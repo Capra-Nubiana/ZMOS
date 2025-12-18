@@ -2,17 +2,29 @@
 
 ## Overview
 
-ZMOS is a multi-tenant SaaS backend platform built with NestJS, Prisma, and PostgreSQL. The system provides tenant-isolated authentication and user management with a clean architecture following the ports & adapters pattern.
+**ZMOS (Zimasa MotionOS)** is a Movement & Fitness OS for the Zimasa Health Engagement Platform. It provides multi-tenant SaaS capabilities with AI-driven development lifecycle, focusing on movement as health engagement rather than generic gym operations.
+
+This implementation follows the **AI-Driven Development Lifecycle (AI-DLC)** and **Ports & Adapters** architectural pattern, ensuring clean separation between ZMOS movement domain logic and ZHEP shared platform capabilities.
 
 ## Core Requirements
 
-Based on `docs/project-rules.md`:
+Based on `docs/project-rules.md` and `docs/Zimasa MotionOS (ZMOS) – AI-DLC Working Agreement.md`:
 
-- **Multi-tenant SaaS** with shared database/schema
+### **Domain Requirements**
+- **Movement-Centric**: Movement Journeys, Movement Tiles, Movement Events, Movement Adherence Score, Movement Prescription Profiles (MPPs)
+- **Health Engagement Focus**: Behavior change and preventive health, not just administrative operations
+- **Multi-tenant SaaS** with shared database/schema for gyms and corporate accounts
+
+### **Technical Requirements**
+- **AI-DLC Process**: Every feature follows AI elaboration → design review → implementation cycle
 - **Tenant isolation** via `nestjs-cls` and Prisma extensions
 - **JWT authentication** for tenant members
-- **Clean architecture** with no hard dependencies
+- **Ports & Adapters pattern** with clean ZMOS/ZHEP boundaries
 - **PostgreSQL** with Prisma ORM
+
+### **Architectural Boundaries**
+- **ZMOS owns**: Movement domain logic, Movement providers, Journeys, Tiles, Events, Adherence, Streaks, Challenges
+- **ZHEP owns**: Global Party/Identity, Benefits, Payments, Messaging, Health Score Engine, Analytics
 
 ## Current Implementation Status ✅
 
@@ -53,6 +65,18 @@ Based on `docs/project-rules.md`:
 
 ### Phase 1: Foundation & Authentication ✅ (COMPLETED)
 
+**AI-DLC Status**: ✅ Implemented without AI assistance (initial setup)
+
+**Deliverables**:
+- ✅ Multi-tenant database schema with Tenant/Member models
+- ✅ JWT authentication system with bcrypt
+- ✅ Prisma client extensions for tenant isolation
+- ✅ CLS context management with nestjs-cls
+- ✅ RESTful API endpoints with class-validator DTOs
+- ✅ Development tooling and Git workflow
+
+**Domain Alignment**: Generic authentication foundation ready for movement-specific features
+
 #### Objectives
 - Establish multi-tenant architecture
 - Implement secure authentication
@@ -66,19 +90,37 @@ Based on `docs/project-rules.md`:
 - [x] Development tooling setup
 - [x] Git workflow and conventions
 
-### Phase 2: User Management & Onboarding 🚧 (CURRENT)
+### Phase 2: Core Movement Domain & AI-DLC Setup 🚧 (CURRENT)
+
+**AI-DLC Required**: ✅ Every feature must follow AI elaboration process
+
+**Modules to Implement** (from Working Agreement):
+- **MoveOS**: Core movement domain logic
+- **PulseLoop**: Movement tracking and monitoring
+- **CarePath Move**: Care pathway movement prescriptions
+- **Corporate Accounts**: Enterprise movement programs
 
 #### Objectives
-- Implement user registration and profile management
-- Create onboarding workflows
-- Add user preferences and settings
+- Establish core conceptual data model (MovementJourney, MovementEvent, MovementTile, etc.)
+- Implement AI-DLC workflow for all features
+- Create movement domain entities and services
+- Set up movement prescription profiles (MPPs)
+- Build adherence scoring system
+
+#### AI-DLC Process per Feature
+1. **Problem Framing**: Create ticket with use case and constraints
+2. **AI Elaboration**: Generate design notes with data models, APIs, edge cases
+3. **Design Decision**: Client review and approval
+4. **Implementation**: Code with AI assistance, tests, docs
+5. **Demo & Acceptance**: Test scenarios and client approval
 
 #### Deliverables
-- [ ] User registration API with email verification
-- [ ] User profile management
-- [ ] Password reset functionality
-- [ ] User preferences and settings
-- [ ] Onboarding flow and welcome system
+- [ ] Core conceptual ERD with movement domain entities
+- [ ] MovementJourney, MovementEvent, MovementTile models
+- [ ] Movement Prescription Profile (MPP) system
+- [ ] Basic adherence calculation engine
+- [ ] AI-DLC workflow documentation and templates
+- [ ] Movement domain glossary and terminology guide
 
 #### Implementation Details
 
@@ -149,43 +191,46 @@ export class UpdateProfileDto {
 - Feature introduction tours
 - Quick start guides
 
-### Phase 3: Role-Based Access Control (RBAC)
+### Phase 3: Movement Prescription & Care Integration
+
+**AI-DLC Required**: ✅ Full AI elaboration for prescription logic
 
 #### Objectives
-- Implement granular permissions system
-- Create role management
-- Add resource-level authorization
+- Implement Movement Prescription Profiles (MPPs)
+- Create care pathway movement integration
+- Build prescription adherence monitoring
+- Connect with ZHEP eligibility and benefits systems
 
 #### Deliverables
-- [ ] Role definitions and permissions
-- [ ] User-role assignments
-- [ ] Resource-based authorization
-- [ ] Admin role management interfaces
+- [ ] MPP creation and management APIs
+- [ ] CarePath Move integration adapters
+- [ ] Prescription assignment to users
+- [ ] Movement adherence tracking against prescriptions
+- [ ] ZHEP eligibility port (non-hard dependency)
 
-#### Implementation Details
-
-##### 3.1 Permission System
+#### Domain Entities
 ```typescript
-export enum Permission {
-  // User management
-  USER_CREATE = 'user:create',
-  USER_READ = 'user:read',
-  USER_UPDATE = 'user:update',
-  USER_DELETE = 'user:delete',
-
-  // Tenant management
-  TENANT_UPDATE = 'tenant:update',
-  TENANT_DELETE = 'tenant:delete',
-
-  // System admin
-  SYSTEM_ADMIN = 'system:admin'
+// Movement Prescription Profile
+export class MovementPrescriptionProfile {
+  id: string;
+  tenantId: string;
+  name: string;
+  description: string;
+  movementTiles: MovementTile[];
+  durationWeeks: number;
+  targetAdherence: number;
+  carePathwayId?: string; // Optional ZHEP integration
 }
 
-export enum Role {
-  OWNER = 'owner',
-  ADMIN = 'admin',
-  MEMBER = 'member',
-  GUEST = 'guest'
+// Movement Tile (building block of prescriptions)
+export class MovementTile {
+  id: string;
+  type: 'cardio' | 'strength' | 'flexibility' | 'balance';
+  name: string;
+  description: string;
+  durationMinutes: number;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  instructions: string[];
 }
 ```
 
@@ -211,44 +256,59 @@ export class PermissionGuard implements CanActivate {
 }
 ```
 
-### Phase 4: API Gateway & Rate Limiting
+### Phase 4: Movement Analytics & Reporting
+
+**AI-DLC Required**: ✅ For analytics algorithms and reporting logic
 
 #### Objectives
-- Implement API gateway for request routing
-- Add rate limiting and throttling
-- Create API versioning strategy
+- Build movement adherence analytics
+- Create movement journey progress tracking
+- Implement streak and challenge systems
+- Generate movement health insights
 
 #### Deliverables
-- [ ] API gateway configuration
-- [ ] Rate limiting middleware
-- [ ] API versioning
-- [ ] Request logging and monitoring
+- [ ] Movement adherence score calculation
+- [ ] Journey progress analytics APIs
+- [ ] Streak tracking and rewards system
+- [ ] Movement challenge creation and monitoring
+- [ ] Basic health insights dashboard data
+- [ ] Movement event aggregation and reporting
 
-### Phase 5: Notification System
+### Phase 5: Corporate Accounts & Enterprise Features
+
+**AI-DLC Required**: ✅ For enterprise movement program logic
 
 #### Objectives
-- Implement email and in-app notifications
-- Create notification preferences
-- Add webhook support
+- Implement corporate account management
+- Create enterprise movement programs
+- Build team/group movement challenges
+- Add corporate reporting and analytics
 
 #### Deliverables
-- [ ] Email service integration
-- [ ] In-app notification system
-- [ ] Notification preferences
-- [ ] Webhook endpoints
+- [ ] Corporate account creation and management
+- [ ] Enterprise movement program templates
+- [ ] Team-based challenges and competitions
+- [ ] Corporate wellness dashboard
+- [ ] Employee participation tracking
+- [ ] Enterprise reporting APIs
 
-### Phase 6: Audit Logging & Compliance
+### Phase 6: PulseLoop & Movement Tracking
+
+**AI-DLC Required**: ✅ For movement tracking algorithms
 
 #### Objectives
-- Implement comprehensive audit logging
-- Add data retention policies
-- Ensure GDPR compliance
+- Implement real-time movement tracking
+- Create movement session recording
+- Build pulse/heart rate integration
+- Add movement quality assessment
 
 #### Deliverables
-- [ ] Audit log system
-- [ ] Data export functionality
-- [ ] GDPR compliance features
-- [ ] Security monitoring
+- [ ] Movement session start/stop tracking
+- [ ] Real-time movement data capture
+- [ ] Pulse/heart rate monitoring integration
+- [ ] Movement form/quality assessment
+- [ ] Session summary and analytics
+- [ ] Historical movement data storage
 
 ### Phase 7: Testing & Quality Assurance
 
@@ -264,19 +324,38 @@ export class PermissionGuard implements CanActivate {
 - [ ] CI/CD pipeline
 - [ ] Performance monitoring
 
-### Phase 8: Deployment & DevOps
+### Phase 7: Integration & ZHEP Ports
+
+**AI-DLC Required**: ✅ For integration adapter design
 
 #### Objectives
-- Set up production deployment
-- Implement monitoring and alerting
-- Create backup and recovery procedures
+- Implement ZHEP integration ports
+- Create identity and eligibility adapters
+- Build payment and messaging interfaces
+- Ensure clean architectural boundaries
 
 #### Deliverables
-- [ ] Docker containerization
-- [ ] Kubernetes deployment
-- [ ] Monitoring (Prometheus/Grafana)
-- [ ] Backup and recovery
-- [ ] SSL/TLS configuration
+- [ ] Identity service port (non-hard dependency)
+- [ ] Eligibility/benefits adapter
+- [ ] Payment orchestration interface
+- [ ] Messaging infrastructure adapter
+- [ ] Health score engine integration port
+
+### Phase 8: Production Deployment & Monitoring
+
+#### Objectives
+- Set up production deployment pipeline
+- Implement comprehensive monitoring
+- Create backup and disaster recovery
+- Establish security hardening
+
+#### Deliverables
+- [ ] Docker containerization with health checks
+- [ ] Kubernetes deployment with auto-scaling
+- [ ] Comprehensive monitoring (Prometheus/Grafana)
+- [ ] Automated backup and recovery procedures
+- [ ] Security hardening and compliance auditing
+- [ ] Performance optimization and load testing
 
 ## Database Schema Evolution
 
@@ -487,8 +566,67 @@ docs(api): add user management endpoints documentation
 - Performance optimization
 - Deployment automation
 
+## AI-DLC Compliance & Working Agreement Alignment
+
+This implementation plan is designed to comply with the **Zimasa MotionOS AI-DLC Working Agreement**:
+
+### ✅ **Aligned Principles**
+- **Movement as Health Engagement**: All phases focus on movement domain logic supporting behavior change and preventive health
+- **Ports & Adapters Pattern**: Clean separation between ZMOS movement domain and ZHEP shared capabilities
+- **ZMOS Standalone Capability**: All features work independently of ZHEP integrations
+- **Small, Documented Increments**: Each phase delivers working, tested functionality
+
+### ✅ **AI-DLC Integration**
+- **Problem Framing**: Each phase includes clear objectives and deliverables
+- **AI Elaboration**: Technical specifications include data models, APIs, and edge cases
+- **Design Decisions**: Architecture reviews ensure domain integrity
+- **Implementation with AI Assist**: All development leverages AI tools
+- **Demo & Acceptance**: Each phase includes testing and validation
+
+### ✅ **Domain Boundaries**
+- **ZMOS Scope**: Movement Journeys, Tiles, Events, Adherence, MPPs, Corporate Accounts
+- **ZHEP Integration**: Identity, eligibility, payments, messaging through clean ports
+- **No Hard Dependencies**: ZHEP integrations are optional adapters
+
+### ✅ **Quality Standards**
+- **Tests**: Each phase includes unit and integration tests
+- **Documentation**: AI design notes and feature documentation
+- **Code Quality**: Domain-aligned naming and clean architecture
+- **Security**: Tenant isolation and proper authentication
+
+## Development Workflow Alignment
+
+### **Branching Strategy** (Aligned with Working Agreement)
+```
+main (production)
+├── develop (integration)
+│   ├── capra-nubiana/feature/movement-onboarding
+│   ├── capra-nubiana/feature/pulse-integration
+│   └── capra-nubiana/feature/corporate-accounts
+```
+
+### **AI-DLC per Feature** (Required for all development)
+1. **Problem Framing** → Create issue with use case and constraints
+2. **AI Elaboration** → Generate design notes with data models and APIs
+3. **Design Decision** → Client review and approval
+4. **Implementation** → Code with AI assistance + tests
+5. **Demo & Acceptance** → Testing and client approval
+
+## Success Metrics Alignment
+
+- **Domain Integrity**: Features support movement as health engagement
+- **Architectural Cleanliness**: Clear ZMOS/ZHEP boundaries maintained
+- **AI-DLC Compliance**: Every feature follows the AI-assisted process
+- **Standalone Capability**: ZMOS works independently of ZHEP
+
 ## Conclusion
 
-This implementation plan provides a comprehensive roadmap for developing ZMOS as a robust, scalable multi-tenant SaaS platform. The foundation is solid, and the phased approach ensures incremental delivery of value while maintaining code quality and architectural integrity.
+This implementation plan is **fully aligned** with the Zimasa MotionOS AI-DLC Working Agreement. It respects:
 
-The current implementation (Phase 1) provides a strong foundation with proper tenant isolation, secure authentication, and clean architecture. Subsequent phases build upon this foundation to deliver a complete SaaS solution.
+- **Domain boundaries** between ZMOS movement logic and ZHEP platform capabilities
+- **AI-DLC process** requirements for every feature development
+- **Movement-centric focus** on health engagement rather than generic gym operations
+- **Clean architecture** with ports & adapters for cross-cutting concerns
+- **Quality standards** for testing, documentation, and code quality
+
+The phased approach ensures incremental delivery while maintaining architectural integrity and domain alignment. Each phase builds upon the previous one, creating a comprehensive Movement & Fitness OS that supports preventive health and behavior change.
