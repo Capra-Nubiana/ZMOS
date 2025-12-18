@@ -1,30 +1,32 @@
 # ZMOS Implementation Plan
 
+**Reference Document**: `docs/Zimasa MotionOS (ZMOS) – AI-DLC Working Agreement.md`
+
 ## Overview
 
 **ZMOS (Zimasa MotionOS)** is a Movement & Fitness OS for the Zimasa Health Engagement Platform. It provides multi-tenant SaaS capabilities with AI-driven development lifecycle, focusing on movement as health engagement rather than generic gym operations.
 
 This implementation follows the **AI-Driven Development Lifecycle (AI-DLC)** and **Ports & Adapters** architectural pattern, ensuring clean separation between ZMOS movement domain logic and ZHEP shared platform capabilities.
 
-## Core Requirements
+## Core Principles (from Working Agreement)
 
-Based on `docs/project-rules.md` and `docs/Zimasa MotionOS (ZMOS) – AI-DLC Working Agreement.md`:
-
-### **Domain Requirements**
-- **Movement-Centric**: Movement Journeys, Movement Tiles, Movement Events, Movement Adherence Score, Movement Prescription Profiles (MPPs)
-- **Health Engagement Focus**: Behavior change and preventive health, not just administrative operations
-- **Multi-tenant SaaS** with shared database/schema for gyms and corporate accounts
-
-### **Technical Requirements**
-- **AI-DLC Process**: Every feature follows AI elaboration → design review → implementation cycle
-- **Tenant isolation** via `nestjs-cls` and Prisma extensions
-- **JWT authentication** for tenant members
-- **Ports & Adapters pattern** with clean ZMOS/ZHEP boundaries
-- **PostgreSQL** with Prisma ORM
+### **Domain Focus**
+- **Movement as Health Engagement**: Supports behavior change and preventive health, not just gym administration
+- **Core Movement Concepts**: Movement Journeys, Movement Tiles, Movement Events, Adherence, Streaks, Movement Prescription Profiles (MPPs)
+- **Health Outcomes**: Preventive care, habit formation, engagement metrics
 
 ### **Architectural Boundaries**
-- **ZMOS owns**: Movement domain logic, Movement providers, Journeys, Tiles, Events, Adherence, Streaks, Challenges
-- **ZHEP owns**: Global Party/Identity, Benefits, Payments, Messaging, Health Score Engine, Analytics
+- **ZMOS Scope**: Movement domain logic, providers, journeys, tiles, events, adherence, streaks, challenges, corporate accounts
+- **ZHEP Scope**: Global identity, benefits/wallets, payments, messaging, health score engine, analytics
+- **Ports & Adapters**: Clean interfaces for ZHEP integrations (no hard dependencies)
+
+### **AI-DLC Process**
+Every feature follows: **Problem Framing → AI Elaboration → Design Decision → Implementation with AI Assist → Demo & Acceptance**
+
+### **Technical Stack**
+- **Backend**: NestJS + TypeScript + PostgreSQL + Prisma (explicit deviation from Fastify+Drizzle blueprint)
+- **AI Tools**: Cursor/ChatGPT for design and implementation assistance
+- **Architecture**: Ports & Adapters pattern with clean ZMOS/ZHEP boundaries
 
 ## Current Implementation Status ✅
 
@@ -61,21 +63,46 @@ Based on `docs/project-rules.md` and `docs/Zimasa MotionOS (ZMOS) – AI-DLC Wor
 - ✅ Proper error handling
 - ✅ Modular architecture
 
-## Implementation Plan Phases
+## Implementation Phases (AI-DLC Compliant)
 
-### Phase 1: Foundation & Authentication ✅ (COMPLETED)
+### Phase 0 – Alignment & Infra Hardening ✅ (COMPLETED)
 
-**AI-DLC Status**: ✅ Implemented without AI assistance (initial setup)
+**Status**: Infrastructure foundations established and aligned with ZMOS domain requirements.
 
-**Deliverables**:
-- ✅ Multi-tenant database schema with Tenant/Member models
-- ✅ JWT authentication system with bcrypt
-- ✅ Prisma client extensions for tenant isolation
-- ✅ CLS context management with nestjs-cls
-- ✅ RESTful API endpoints with class-validator DTOs
-- ✅ Development tooling and Git workflow
+#### Objectives
+- ✅ Confirm stack, patterns and naming alignment with ZMOS domain
+- ✅ Add cross-cutting infrastructure pieces
+- ✅ Introduce AI-DLC artifacts structure
 
-**Domain Alignment**: Generic authentication foundation ready for movement-specific features
+#### Deliverables ✅
+- ✅ **Stack Confirmation**: NestJS + Prisma + Postgres confirmed (documented deviation from Fastify+Drizzle)
+- ✅ **AI-DLC Folders**: `design/` and `docs/` folders with templates
+- ✅ **Audit Logging**: `AuditLog` table and `AuditService` for compliance
+- ✅ **Health & Readiness**: `/health` and `/ready` endpoints
+- ✅ **Observability**: Structured logging with tenant/request IDs
+- ✅ **Rate Limiting**: Basic throttling on auth endpoints
+- ✅ **README & Tech Profile**: Updated documentation
+
+**AI-DLC Compliance**: Infrastructure setup completed with proper documentation.
+
+---
+
+### Phase 1 – Core Platform & Auth ✅ (COMPLETED)
+
+**Status**: Authentication and multi-tenant foundations solid, ready for movement domain features.
+
+#### Objectives
+- ✅ Ensure consistent multi-tenancy (every relevant table has `tenantId`)
+- ✅ Clean up auth & user models to align with ZMOS entities
+- ✅ Add missing profile/onboarding pieces
+
+#### Deliverables ✅
+- ✅ **Multi-Tenant Enforcement**: Prisma extensions + CLS context working
+- ✅ **Auth Enhancement**: Email verification, password reset, enhanced profiles
+- ✅ **Audit Hooks**: Logging for tenant/member creation and auth events
+- ✅ **API Endpoints**: RESTful auth APIs with proper validation
+
+**AI-DLC Compliance**: Foundation features implemented with basic testing and documentation.
 
 #### Objectives
 - Establish multi-tenant architecture
@@ -90,37 +117,124 @@ Based on `docs/project-rules.md` and `docs/Zimasa MotionOS (ZMOS) – AI-DLC Wor
 - [x] Development tooling setup
 - [x] Git workflow and conventions
 
-### Phase 2: Core Movement Domain & AI-DLC Setup 🚧 (CURRENT)
+### Phase 2 – MoveOS Walking Skeleton 🚧 (CURRENT)
 
-**AI-DLC Required**: ✅ Every feature must follow AI elaboration process
+**AI-DLC Required**: ✅ Full compliance required for all features
 
-**Modules to Implement** (from Working Agreement):
-- **MoveOS**: Core movement domain logic
-- **PulseLoop**: Movement tracking and monitoring
-- **CarePath Move**: Care pathway movement prescriptions
-- **Corporate Accounts**: Enterprise movement programs
+**Goal**: Get the core movement flow working end-to-end for a single tenant.
+
+**Walking Skeleton Flow**: `Tenant → Location → SessionType → SessionInstance → Booking → MovementEvent → Simple Streak`
+
+#### AI-DLC: Core Movement ERD Design Note (Required)
+**Status**: Pending - Must be completed first
+- **Location**: `design/moveos-core-erd-ai-elaboration.md`
+- **Contents**: Table structures, relationships, constraints, basic API endpoints, edge cases
+- **Review**: Client approval required before implementation
 
 #### Objectives
-- Establish core conceptual data model (MovementJourney, MovementEvent, MovementTile, etc.)
-- Implement AI-DLC workflow for all features
-- Create movement domain entities and services
-- Set up movement prescription profiles (MPPs)
-- Build adherence scoring system
+- ✅ Implement core ERD entities relevant for MoveOS
+- ✅ Allow providers to: Create locations, define class/PT types, schedule sessions, register members, book/check-in, generate MovementEvents
+- ✅ Simple streak calculation per member
 
-#### AI-DLC Process per Feature
-1. **Problem Framing**: Create ticket with use case and constraints
-2. **AI Elaboration**: Generate design notes with data models, APIs, edge cases
-3. **Design Decision**: Client review and approval
-4. **Implementation**: Code with AI assistance, tests, docs
-5. **Demo & Acceptance**: Test scenarios and client approval
+#### Domain Entities (Prisma Models)
+```prisma
+model Location {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid
+  name      String
+  address   String?
+  capacity  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant           Tenant           @relation(fields: [tenantId], references: [id])
+  sessionInstances SessionInstance[]
+
+  @@index([tenantId])
+}
+
+model SessionType {
+  id          String @id @default(uuid()) @db.Uuid
+  tenantId    String @db.Uuid
+  name        String
+  description String?
+  durationMin Int
+  category    String // 'class', 'pt', 'group'
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant           Tenant           @relation(fields: [tenantId], references: [id])
+  sessionInstances SessionInstance[]
+
+  @@index([tenantId])
+}
+
+model SessionInstance {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  sessionTypeId String  @db.Uuid
+  locationId   String   @db.Uuid
+  startTime    DateTime
+  endTime      DateTime
+  capacity     Int?
+  status       String   @default("scheduled") // 'scheduled', 'cancelled', 'completed'
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  sessionType  SessionType @relation(fields: [sessionTypeId], references: [id])
+  location     Location   @relation(fields: [locationId], references: [id])
+  bookings     Booking[]
+
+  @@index([tenantId])
+  @@index([startTime])
+}
+
+model Booking {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @db.Uuid
+  memberId         String   @db.Uuid
+  sessionInstanceId String  @db.Uuid
+  status           String   @default("confirmed") // 'confirmed', 'cancelled', 'no_show', 'attended'
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  member          Member          @relation(fields: [memberId], references: [id])
+  sessionInstance SessionInstance @relation(fields: [sessionInstanceId], references: [id])
+
+  @@index([tenantId])
+  @@index([memberId])
+}
+
+model MovementEvent {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @db.Uuid
+  memberId         String   @db.Uuid
+  sessionInstanceId String? @db.Uuid
+  type             String   // 'class_attendance', 'gym_checkin', 'booking_created', etc.
+  metadata         Json?    // Additional event data
+  createdAt        DateTime @default(now())
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  member          Member          @relation(fields: [memberId], references: [id])
+  sessionInstance SessionInstance? @relation(fields: [sessionInstanceId], references: [id])
+
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([createdAt])
+}
+```
 
 #### Deliverables
-- [ ] Core conceptual ERD with movement domain entities
-- [ ] MovementJourney, MovementEvent, MovementTile models
-- [ ] Movement Prescription Profile (MPP) system
-- [ ] Basic adherence calculation engine
-- [ ] AI-DLC workflow documentation and templates
-- [ ] Movement domain glossary and terminology guide
+- [ ] AI elaboration design note for MoveOS core ERD
+- [ ] Database migrations for all entities
+- [ ] Provider APIs: locations, session types, scheduling
+- [ ] Booking & check-in APIs with MovementEvent generation
+- [ ] Simple streak calculation (consecutive days with events)
+- [ ] End-to-end demo script and tests
+
+**AI-DLC Compliance**: Must follow full process with design note, tests, and demo.
 
 #### Implementation Details
 
@@ -191,48 +305,91 @@ export class UpdateProfileDto {
 - Feature introduction tours
 - Quick start guides
 
-### Phase 3: Movement Prescription & Care Integration
+### Phase 3 – PulseLoop Basics
 
-**AI-DLC Required**: ✅ Full AI elaboration for prescription logic
+**AI-DLC Required**: ✅ Full compliance for habit signals implementation
+
+**Goal**: Turn raw MovementEvents into habit signals: streaks, simple adherence, basic challenges.
+
+#### AI-DLC: PulseLoop Design Note (Required)
+- **Location**: `design/pulseloop-v1-ai-elaboration.md`
+- **Contents**: MovementEvent classification, adherence formula, challenge structure, test cases
 
 #### Objectives
-- Implement Movement Prescription Profiles (MPPs)
-- Create care pathway movement integration
-- Build prescription adherence monitoring
-- Connect with ZHEP eligibility and benefits systems
-
-#### Deliverables
-- [ ] MPP creation and management APIs
-- [ ] CarePath Move integration adapters
-- [ ] Prescription assignment to users
-- [ ] Movement adherence tracking against prescriptions
-- [ ] ZHEP eligibility port (non-hard dependency)
+- ✅ Formalize MovementEvent types
+- ✅ Introduce Movement Tiles as micro-activities
+- ✅ Compute Movement Adherence Score per member
+- ✅ Implement basic challenges & leaderboards
 
 #### Domain Entities
-```typescript
-// Movement Prescription Profile
-export class MovementPrescriptionProfile {
-  id: string;
-  tenantId: string;
-  name: string;
-  description: string;
-  movementTiles: MovementTile[];
-  durationWeeks: number;
-  targetAdherence: number;
-  carePathwayId?: string; // Optional ZHEP integration
+```prisma
+model MovementTile {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @db.Uuid
+  name           String
+  description    String?
+  type           String   // 'cardio', 'strength', 'flexibility', 'balance'
+  durationMin    Int
+  difficulty     String   @default("intermediate") // 'beginner', 'intermediate', 'advanced'
+  instructions   String[] // JSON array
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 
-// Movement Tile (building block of prescriptions)
-export class MovementTile {
-  id: string;
-  type: 'cardio' | 'strength' | 'flexibility' | 'balance';
-  name: string;
-  description: string;
-  durationMinutes: number;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  instructions: string[];
+model Challenge {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String
+  description String?
+  type        String   // 'streak', 'attendance', 'duration', 'tile_completion'
+  targetValue Int      // e.g., 10 sessions, 5 hours, etc.
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tenant             Tenant              @relation(fields: [tenantId], references: [id])
+  participants       ChallengeParticipant[]
+
+  @@index([tenantId])
+  @@index([isActive])
+}
+
+model ChallengeParticipant {
+  id          String   @id @default(uuid()) @db.Uuid
+  challengeId String   @db.Uuid
+  memberId    String   @db.Uuid
+  tenantId    String   @db.Uuid
+  currentValue Int     @default(0)
+  completed   Boolean  @default(false)
+  joinedAt    DateTime @default(now())
+
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  member     Member    @relation(fields: [memberId], references: [id])
+
+  @@unique([challengeId, memberId])
+  @@index([tenantId])
 }
 ```
+
+#### Implementation Tasks
+1. **Extend MovementEvent** with type classification
+2. **Movement Tiles** API (list, assign to members)
+3. **Adherence Calculation** (simple formula: actual/target for time period)
+4. **Challenge System** (creation, joining, progress tracking)
+5. **Basic Leaderboards** (top performers per challenge)
+
+#### Deliverables
+- [ ] PulseLoop v1 with adherence scoring and tiles
+- [ ] Basic challenges and leaderboards
+- [ ] Tests and demo for adherence/challenge flows
+- [ ] Design documentation for adherence formula
+
+**AI-DLC Compliance**: Design note, tests, and acceptance demo required.
 
 ##### 3.2 Authorization Guards
 ```typescript
@@ -256,106 +413,246 @@ export class PermissionGuard implements CanActivate {
 }
 ```
 
-### Phase 4: Movement Analytics & Reporting
+### Phase 4 – CarePath Move v1
 
-**AI-DLC Required**: ✅ For analytics algorithms and reporting logic
+**AI-DLC Required**: ✅ For journey structure and adherence logic
 
-#### Objectives
-- Build movement adherence analytics
-- Create movement journey progress tracking
-- Implement streak and challenge systems
-- Generate movement health insights
+**Goal**: Introduce structured Movement Journeys and tie adherence to journeys.
 
-#### Deliverables
-- [ ] Movement adherence score calculation
-- [ ] Journey progress analytics APIs
-- [ ] Streak tracking and rewards system
-- [ ] Movement challenge creation and monitoring
-- [ ] Basic health insights dashboard data
-- [ ] Movement event aggregation and reporting
-
-### Phase 5: Corporate Accounts & Enterprise Features
-
-**AI-DLC Required**: ✅ For enterprise movement program logic
+#### AI-DLC: CarePath Move Design Note (Required)
+- **Location**: `design/carepath-move-v1-ai-elaboration.md`
+- **Contents**: Journey structure, tile relationships, journey-level adherence, coach APIs
 
 #### Objectives
-- Implement corporate account management
-- Create enterprise movement programs
-- Build team/group movement challenges
-- Add corporate reporting and analytics
+- ✅ Create MovementJourney entity and JourneyEnrollment
+- ✅ Attach simple goals/targets to journeys
+- ✅ Compute adherence per JourneyEnrollment
+
+#### Domain Entities
+```prisma
+model MovementJourney {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @db.Uuid
+  name          String
+  description   String?
+  durationWeeks Int
+  targetAdherence Float  @default(0.7) // 70% target
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  enrollments JourneyEnrollment[]
+
+  @@index([tenantId])
+  @@index([isActive])
+}
+
+model JourneyEnrollment {
+  id            String   @id @default(uuid()) @db.Uuid
+  journeyId     String   @db.Uuid
+  memberId      String   @db.Uuid
+  tenantId      String   @db.Uuid
+  startDate     DateTime
+  endDate       DateTime?
+  currentAdherence Float  @default(0.0)
+  status        String   @default("active") // 'active', 'completed', 'paused'
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  journey      MovementJourney @relation(fields: [journeyId], references: [id])
+  member       Member          @relation(fields: [memberId], references: [id])
+
+  @@unique([journeyId, memberId])
+  @@index([tenantId])
+  @@index([status])
+}
+```
+
+#### Implementation Tasks
+1. **Journey Management** APIs (create, list, enroll members)
+2. **Journey Progress** tracking and adherence calculation
+3. **Coach/Console APIs** for monitoring member progress
+4. **Simple Goal Setting** (attendance %, duration targets)
 
 #### Deliverables
-- [ ] Corporate account creation and management
-- [ ] Enterprise movement program templates
-- [ ] Team-based challenges and competitions
-- [ ] Corporate wellness dashboard
-- [ ] Employee participation tracking
-- [ ] Enterprise reporting APIs
+- [ ] MovementJourney and JourneyEnrollment models + APIs
+- [ ] Journey-level adherence calculation
+- [ ] Coach console for monitoring progress
+- [ ] Tests and demo for journey enrollment/adherence
 
-### Phase 6: PulseLoop & Movement Tracking
+**AI-DLC Compliance**: Design note, implementation with AI assist, tests, and demo required.
 
-**AI-DLC Required**: ✅ For movement tracking algorithms
+### Phase 5 – Corporate Accounts & Movement Packages
+
+**AI-DLC Required**: ✅ For enterprise program logic
+
+**Goal**: Support corporate deals in ZMOS-only mode (employers buying access).
+
+#### AI-DLC: Corporate Design Note (Required)
+- **Location**: `design/corporate-accounts-v1-ai-elaboration.md`
 
 #### Objectives
-- Implement real-time movement tracking
-- Create movement session recording
-- Build pulse/heart rate integration
-- Add movement quality assessment
+- ✅ Add CorporateAccount and CorporateMember
+- ✅ Bind corporate accounts to AccessPlans/MovementJourneys
+- ✅ Basic corporate reporting
+
+#### Domain Entities
+```prisma
+model CorporateAccount {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid  // The ZMOS tenant (movement provider)
+  companyName String
+  contactEmail String
+  contractStart DateTime
+  contractEnd   DateTime?
+  maxMembers   Int?
+  status       String   @default("active") // 'active', 'suspended', 'expired'
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant   Tenant            @relation(fields: [tenantId], references: [id])
+  members  CorporateMember[]
+  packages CorporatePackage[]
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model CorporateMember {
+  id                 String   @id @default(uuid()) @db.Uuid
+  corporateAccountId String   @db.Uuid
+  memberId          String   @unique @db.Uuid
+  tenantId           String   @db.Uuid
+  employeeId         String?  // Company employee ID
+  status             String   @default("active")
+  joinedAt           DateTime @default(now())
+
+  corporateAccount   CorporateAccount @relation(fields: [corporateAccountId], references: [id])
+  member             Member           @relation(fields: [memberId], references: [id])
+
+  @@unique([corporateAccountId, memberId])
+  @@index([tenantId])
+}
+
+model CorporatePackage {
+  id                 String @id @default(uuid()) @db.Uuid
+  corporateAccountId String @db.Uuid
+  name               String // e.g., "Executive Wellness Package"
+  journeyId          String? @db.Uuid // Optional linked journey
+  sessionAllowance   Int?   // Monthly session limit
+  effectiveDate      DateTime
+  expiryDate         DateTime?
+
+  corporateAccount   CorporateAccount @relation(fields: [corporateAccountId], references: [id])
+  journey            MovementJourney? @relation(fields: [journeyId], references: [id])
+
+  @@index([corporateAccountId])
+}
+```
+
+#### Implementation Tasks
+1. **Corporate Account Management** APIs
+2. **Corporate Member Enrollment** and management
+3. **Package Assignment** (journeys, session limits)
+4. **Corporate Reporting** (participation, utilization)
 
 #### Deliverables
-- [ ] Movement session start/stop tracking
-- [ ] Real-time movement data capture
-- [ ] Pulse/heart rate monitoring integration
-- [ ] Movement form/quality assessment
-- [ ] Session summary and analytics
-- [ ] Historical movement data storage
+- [ ] Corporate accounts working end-to-end in ZMOS-only mode
+- [ ] Corporate member management and package assignment
+- [ ] Basic corporate reporting APIs
+- [ ] Tests and demo for corporate workflows
 
-### Phase 7: Testing & Quality Assurance
+**AI-DLC Compliance**: Design note and full AI-DLC process required.
+
+### Phase 6 – ZHEP Ports & Integration Adapters
+
+**AI-DLC Required**: ✅ For integration interface design
+
+**Goal**: Prepare ZMOS to work as movement vertical inside ZHEP without breaking standalone mode.
+
+#### AI-DLC: Integration Design Note (Required)
+- **Location**: `design/zhep-integration-ports-ai-elaboration.md`
+- **Contents**: Port interfaces, adapter patterns, mode switching
 
 #### Objectives
-- Achieve comprehensive test coverage
-- Implement CI/CD pipeline
-- Add performance monitoring
+- ✅ Define ports/interfaces for cross-cutting concerns
+- ✅ Implement stubbed adapters (can be fake initially)
+- ✅ Configuration for ZMOS-only vs ZHEP modes
+
+#### Ports to Implement
+1. **IdentityService** - User authentication/authorization
+2. **EligibilityService** - Benefits and coverage checking
+3. **PaymentService** - Transaction processing
+4. **MessagingService** - Email/SMS notifications
+5. **AnalyticsService** - Data aggregation and reporting
+
+#### Implementation Tasks
+1. **Port Interfaces** in `core/ports/` module
+2. **Stub Adapters** with fake responses for development
+3. **Configuration System** for mode switching
+4. **Integration Tests** for port compatibility
 
 #### Deliverables
-- [ ] Unit test coverage > 80%
-- [ ] Integration tests
-- [ ] E2E test suite
-- [ ] CI/CD pipeline
-- [ ] Performance monitoring
+- [ ] Port interfaces defined and documented
+- [ ] Stub ZHEP adapters implemented
+- [ ] Configuration for mode switching
+- [ ] Seamless operation in both standalone and ZHEP modes
 
-### Phase 7: Integration & ZHEP Ports
+**AI-DLC Compliance**: Integration design note required.
 
-**AI-DLC Required**: ✅ For integration adapter design
+### Phase 7 – Frontend MVPs
+
+**AI-DLC Required**: ✅ For UI/UX design and user flows
+
+**Goal**: Provide usable UIs for providers and basic member access to prove end-to-end flows.
 
 #### Objectives
-- Implement ZHEP integration ports
-- Create identity and eligibility adapters
-- Build payment and messaging interfaces
-- Ensure clean architectural boundaries
+- ✅ Provider Console MVP (tenant management, scheduling, reporting)
+- ✅ Member Portal MVP (schedule viewing, booking, basic progress)
+
+#### Implementation Tasks
+1. **Provider Console APIs** (backend readiness check)
+2. **Member APIs** (schedule, booking, progress)
+3. **Authentication Flows** (provider vs member logins)
+4. **Basic Responsive UI** implementation
 
 #### Deliverables
-- [ ] Identity service port (non-hard dependency)
-- [ ] Eligibility/benefits adapter
-- [ ] Payment orchestration interface
-- [ ] Messaging infrastructure adapter
-- [ ] Health score engine integration port
+- [ ] Provider Console MVP with core functionality
+- [ ] Member Portal MVP with essential features
+- [ ] End-to-end user flows tested
+- [ ] UI/UX design notes and user testing
 
-### Phase 8: Production Deployment & Monitoring
+**AI-DLC Compliance**: UI design elaboration required.
+
+### Phase 8 – Hardening, CI/CD, Observability & Production Readiness
+
+**AI-DLC Required**: ✅ For infrastructure and monitoring design
+
+**Goal**: Make ZMOS safe, observable, and deployable to production.
 
 #### Objectives
-- Set up production deployment pipeline
-- Implement comprehensive monitoring
-- Create backup and disaster recovery
-- Establish security hardening
+- ✅ Comprehensive tests (unit + integration + e2e)
+- ✅ CI/CD pipelines
+- ✅ Observability & monitoring
+- ✅ Security hardening, backups, DR
+
+#### Implementation Tasks
+1. **Test Coverage** > 80% with meaningful automated tests
+2. **CI/CD Pipeline** (linting, testing, deployment)
+3. **Containerization** with health/readiness probes
+4. **Monitoring Stack** (Prometheus, Grafana, Sentry)
+5. **Security Audit** and hardening
+6. **Backup & Recovery** procedures
 
 #### Deliverables
-- [ ] Docker containerization with health checks
-- [ ] Kubernetes deployment with auto-scaling
-- [ ] Comprehensive monitoring (Prometheus/Grafana)
-- [ ] Automated backup and recovery procedures
-- [ ] Security hardening and compliance auditing
-- [ ] Performance optimization and load testing
+- [ ] CI/CD pipelines defined and operational
+- [ ] Monitoring and alerting implemented
+- [ ] Security hardening completed
+- [ ] Backup/recovery procedures documented
+- [ ] ZMOS ready for pilot deployments
+
+**AI-DLC Compliance**: Infrastructure design notes for monitoring and deployment.
 
 ## Database Schema Evolution
 
@@ -619,14 +916,84 @@ main (production)
 - **AI-DLC Compliance**: Every feature follows the AI-assisted process
 - **Standalone Capability**: ZMOS works independently of ZHEP
 
+## AI-DLC Compliance & Working Agreement Alignment
+
+This implementation plan is designed to **fully comply** with the **Zimasa MotionOS AI-DLC Working Agreement**:
+
+### ✅ **Aligned Principles**
+- **Movement as Health Engagement**: All phases focus on movement domain logic supporting behavior change and preventive health
+- **Ports & Adapters Pattern**: Clean separation between ZMOS movement domain and ZHEP shared capabilities
+- **ZMOS Standalone Capability**: All features work independently of ZHEP integrations
+- **Small, Documented Increments**: Each phase delivers working, tested functionality
+- **AI-DLC by Default**: Every feature follows the AI-assisted cycle
+
+### ✅ **AI-DLC Integration per Phase**
+- **Phase 0**: Infrastructure setup with documentation
+- **Phase 1**: Auth foundations (already implemented)
+- **Phase 2-8**: Each requires AI elaboration → design decision → implementation with AI assist → demo & acceptance
+
+### ✅ **Domain Integrity**
+- **Movement-Centric**: Core domain entities (Journeys, Tiles, Events, Adherence, MPPs)
+- **Health Outcomes**: Focus on preventive care and behavior change
+- **ZHEP Boundaries**: Clean architectural separation maintained
+
+### ✅ **Quality Standards**
+- **Tests**: Each phase includes unit + integration tests
+- **Documentation**: AI design notes + feature docs
+- **Code Quality**: Domain-aligned naming and clean architecture
+- **Security**: Tenant isolation and proper authentication
+
+## Development Workflow Alignment
+
+### **Branching Strategy** (Aligned)
+```
+main (production)
+├── develop (integration)
+│   ├── capra-nubiana/feature/onboarding
+│   ├── capra-nubiana/feature/moveos-core
+│   └── capra-nubiana/feature/pulseloop
+```
+
+### **AI-DLC per Feature** (Required)
+1. **Problem Framing** → Create issue with use case
+2. **AI Elaboration** → Generate design notes with data models/APIs
+3. **Design Decision** → Client review and approval
+4. **Implementation** → Code with AI assistance + tests
+5. **Demo & Acceptance** → Testing and client approval
+
+## Success Metrics Alignment
+
+- **Domain Integrity**: Features support movement as health engagement
+- **Architectural Cleanliness**: Clear ZMOS/ZHEP boundaries
+- **AI-DLC Compliance**: Every feature follows the AI-assisted process
+- **Standalone Capability**: ZMOS works independently of ZHEP
+- **Quality Standards**: Comprehensive testing and documentation
+
+## Current Implementation Status
+
+### ✅ **Completed Phases:**
+- **Phase 0**: Infrastructure & AI-DLC setup ✅
+- **Phase 1**: Core platform & auth ✅
+
+### 🚧 **Current Phase:**
+- **Phase 2**: MoveOS Walking Skeleton (in progress)
+
+### 📋 **Planned Phases:**
+- **Phase 3**: PulseLoop Basics
+- **Phase 4**: CarePath Move v1
+- **Phase 5**: Corporate Accounts
+- **Phase 6**: ZHEP Ports & Integration
+- **Phase 7**: Frontend MVPs
+- **Phase 8**: Production Hardening
+
 ## Conclusion
 
-This implementation plan is **fully aligned** with the Zimasa MotionOS AI-DLC Working Agreement. It respects:
+This consolidated implementation plan serves as the **definitive roadmap** for ZMOS development, fully aligned with the Zimasa MotionOS AI-DLC Working Agreement. It ensures:
 
-- **Domain boundaries** between ZMOS movement logic and ZHEP platform capabilities
-- **AI-DLC process** requirements for every feature development
-- **Movement-centric focus** on health engagement rather than generic gym operations
-- **Clean architecture** with ports & adapters for cross-cutting concerns
-- **Quality standards** for testing, documentation, and code quality
+- **Domain Integrity**: Movement as health engagement focus maintained
+- **AI-DLC Compliance**: Every feature follows the AI-assisted process
+- **Architectural Cleanliness**: Ports & adapters pattern implemented
+- **Quality Assurance**: Comprehensive testing and documentation
+- **Incremental Delivery**: Working slices delivered in each phase
 
-The phased approach ensures incremental delivery while maintaining architectural integrity and domain alignment. Each phase builds upon the previous one, creating a comprehensive Movement & Fitness OS that supports preventive health and behavior change.
+The plan provides clear guidance for implementing ZMOS as a robust, AI-driven multi-tenant SaaS platform that supports preventive health through movement engagement.

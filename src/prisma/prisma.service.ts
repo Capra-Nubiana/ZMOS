@@ -122,6 +122,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     });
   }
 
+  get tenantId(): string | undefined {
+    return this.cls.get('tenantId');
+  }
+
   async onModuleInit() {
     await this.$connect();
   }
