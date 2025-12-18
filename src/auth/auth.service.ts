@@ -22,7 +22,9 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {
     // Create PostgreSQL adapter for the separate client
-    const connectionString = process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/zmos_db?schema=public';
+    const connectionString =
+      process.env.DATABASE_URL ||
+      'postgresql://user:pass@localhost:5432/zmos_db?schema=public';
     const pool = new Pool({ connectionString });
     const adapter = new PrismaPg(pool);
     this.prismaClient = new PrismaClient({ adapter });

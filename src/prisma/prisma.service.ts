@@ -3,9 +3,7 @@ import { ClsService } from 'nestjs-cls';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
-const {
-  PrismaClient,
-} = require('../generated/client');
+const { PrismaClient } = require('../generated/client');
 
 type PrismaClientType = typeof PrismaClient;
 
@@ -16,7 +14,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor(private readonly cls: ClsService) {
     // Set default DATABASE_URL if not provided
     if (!process.env.DATABASE_URL) {
-      process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/zmos_db?schema=public';
+      process.env.DATABASE_URL =
+        'postgresql://user:pass@localhost:5432/zmos_db?schema=public';
     }
 
     // Create PostgreSQL adapter

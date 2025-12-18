@@ -16,7 +16,9 @@ export class TenantMiddleware implements NestMiddleware {
 
   constructor(private readonly cls: ClsService) {
     // Create PostgreSQL adapter
-    const connectionString = process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/zmos_db?schema=public';
+    const connectionString =
+      process.env.DATABASE_URL ||
+      'postgresql://user:pass@localhost:5432/zmos_db?schema=public';
     const pool = new Pool({ connectionString });
     const adapter = new PrismaPg(pool);
     this.prisma = new PrismaClient({ adapter });
