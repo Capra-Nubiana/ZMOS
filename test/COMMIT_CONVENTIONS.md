@@ -21,6 +21,7 @@ Consistent commit messages make it easier to understand the history of changes, 
 ```
 feat(auth): add JWT token validation
 fix(db): resolve connection timeout issue
+feat(onboarding): implement welcome email system
 docs(readme): update installation instructions
 chore(deps): update NestJS to version 11
 refactor(prisma): optimize tenant filtering queries
@@ -55,6 +56,7 @@ Scopes help categorize the changes. Use these common scopes:
 - `test` - Testing
 - `ui` - User interface (if applicable)
 - `core` - Core business logic
+- `onboarding` - User onboarding features
 
 ## Description Rules
 
@@ -119,17 +121,32 @@ BREAKING CHANGE: The /auth/login endpoint now requires tenant ID in header
 ### Feature Branches
 ```
 main
-├── feature/user-authentication
-├── feature/tenant-management
-└── bugfix/login-validation
+├── develop
+│   ├── capra-nubiana/feature/onboarding
+│   ├── capra-nubiana/feature/user-dashboard
+│   └── capra-nubiana/bugfix/login-validation
 ```
 
+### Branch Naming Convention
+
+Use descriptive branch names with the following format:
+
+```
+{organization}/{type}/{description}
+```
+
+Examples:
+- `capra-nubiana/feature/onboarding` - New onboarding feature
+- `capra-nubiana/bugfix/login-validation` - Bug fix for login
+- `capra-nubiana/docs/api-documentation` - API documentation updates
+
 ### Commit Process
-1. Make changes
-2. Stage files: `git add <files>`
-3. Commit with proper message: `git commit -m "feat(auth): add password hashing"`
-4. Push branch: `git push origin feature-branch`
-5. Create Pull Request
+1. Create feature branch from `develop`
+2. Make changes in your feature branch
+3. Stage files: `git add <files>`
+4. Commit with proper message: `npm run commit` (or `git commit -m "feat(auth): add password hashing"`)
+5. Push branch: `git push -u origin capra-nubiana/feature/your-feature`
+6. Create Pull Request to `develop` branch
 
 ### Squashing Commits
 When merging feature branches, squash commits to maintain clean history:
@@ -145,22 +162,31 @@ feat: implement user authentication system
 
 ## Tools and Automation
 
-### Commitizen (Recommended)
-Use Commitizen for interactive commit messages:
+### Current Setup (Already Configured)
+
+This project uses automated tooling to ensure commit quality:
+
+- **Commitizen**: Interactive commit message creation (`npm run commit`)
+- **Husky**: Git hooks for pre-commit linting and commit message validation
+- **Commitlint**: Automated commit message validation
+
+### Using Commitizen
+
+Instead of manual commits, use the interactive tool:
 
 ```bash
-npm install -g commitizen
-commitizen init cz-conventional-changelog --save-dev --save-exact
+# Interactive commit (recommended)
+npm run commit
+
+# Or manual commit (follows same format)
+git commit -m "feat(auth): add JWT token validation"
 ```
 
-### Husky + Commitlint (Optional)
-For enforced conventions:
+### Git Hooks (Automatic)
 
-```bash
-npm install --save-dev @commitlint/cli @commitlint/config-conventional husky
-npx husky init
-echo "npx --no -- commitlint --edit \$1" > .husky/commit-msg
-```
+- **pre-commit**: Runs linting before commits
+- **commit-msg**: Validates commit message format
+- **post-commit**: Optional post-commit actions
 
 ### Release Automation
 Use semantic-release for automated versioning:
