@@ -151,9 +151,13 @@ describe('AuthService', () => {
         },
       };
 
-      mockPrismaService.extended.member.findFirst.mockResolvedValue(existingMember);
+      mockPrismaService.extended.member.findFirst.mockResolvedValue(
+        existingMember,
+      );
 
-      await expect(service.signup(signupDto)).rejects.toThrow(ConflictException);
+      await expect(service.signup(signupDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -201,7 +205,9 @@ describe('AuthService', () => {
 
       mockPrismaService.extended.member.findFirst.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException for wrong password', async () => {
@@ -224,7 +230,9 @@ describe('AuthService', () => {
       const bcrypt = require('bcrypt');
       bcrypt.compare.mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });
