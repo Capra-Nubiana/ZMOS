@@ -63,14 +63,12 @@ describe('Auth (e2e)', () => {
 
     it('should reject duplicate email in same tenant', async () => {
       // First signup
-      await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send({
-          email: 'duplicate@example.com',
-          password: 'password123',
-          name: 'First User',
-          tenantName: 'Test Gym',
-        });
+      await request(app.getHttpServer()).post('/auth/signup').send({
+        email: 'duplicate@example.com',
+        password: 'password123',
+        name: 'First User',
+        tenantName: 'Test Gym',
+      });
 
       // Second signup with same email and tenant
       return request(app.getHttpServer())
@@ -86,14 +84,12 @@ describe('Auth (e2e)', () => {
 
     it('should allow same email in different tenants', async () => {
       // First signup
-      await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send({
-          email: 'same@example.com',
-          password: 'password123',
-          name: 'User One',
-          tenantName: 'Gym One',
-        });
+      await request(app.getHttpServer()).post('/auth/signup').send({
+        email: 'same@example.com',
+        password: 'password123',
+        name: 'User One',
+        tenantName: 'Gym One',
+      });
 
       // Second signup with same email but different tenant
       return request(app.getHttpServer())
@@ -111,14 +107,12 @@ describe('Auth (e2e)', () => {
   describe('POST /auth/login', () => {
     beforeEach(async () => {
       // Create a test user
-      await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send({
-          email: 'login@example.com',
-          password: 'password123',
-          name: 'Login User',
-          tenantName: 'Login Gym',
-        });
+      await request(app.getHttpServer()).post('/auth/signup').send({
+        email: 'login@example.com',
+        password: 'password123',
+        name: 'Login User',
+        tenantName: 'Login Gym',
+      });
     });
 
     it('should authenticate user with correct credentials', () => {
