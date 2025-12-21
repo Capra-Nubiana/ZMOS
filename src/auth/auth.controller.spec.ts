@@ -65,9 +65,13 @@ describe('AuthController', () => {
 
       // Note: In a real scenario, validation pipes would handle this
       // This test demonstrates the controller's basic functionality
-      mockAuthService.signup.mockRejectedValue(new BadRequestException('Validation failed'));
+      mockAuthService.signup.mockRejectedValue(
+        new BadRequestException('Validation failed'),
+      );
 
-      await expect(controller.signup(invalidSignupDto as any)).rejects.toThrow(BadRequestException);
+      await expect(controller.signup(invalidSignupDto as any)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -97,9 +101,13 @@ describe('AuthController', () => {
         password: 'wrongpassword',
       };
 
-      mockAuthService.login.mockRejectedValue(new BadRequestException('Invalid credentials'));
+      mockAuthService.login.mockRejectedValue(
+        new BadRequestException('Invalid credentials'),
+      );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(BadRequestException);
+      await expect(controller.login(loginDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });
