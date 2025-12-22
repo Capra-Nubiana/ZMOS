@@ -51,7 +51,12 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Tenant: 'Tenant',
-  Member: 'Member'
+  Member: 'Member',
+  Location: 'Location',
+  SessionType: 'SessionType',
+  SessionInstance: 'SessionInstance',
+  Booking: 'Booking',
+  MovementEvent: 'MovementEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -93,12 +98,100 @@ export const MemberScalarFieldEnum = {
 export type MemberScalarFieldEnum = (typeof MemberScalarFieldEnum)[keyof typeof MemberScalarFieldEnum]
 
 
+export const LocationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  name: 'name',
+  address: 'address',
+  capacity: 'capacity',
+  timezone: 'timezone',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
+
+
+export const SessionTypeScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  name: 'name',
+  description: 'description',
+  durationMin: 'durationMin',
+  category: 'category',
+  maxCapacity: 'maxCapacity',
+  difficulty: 'difficulty',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SessionTypeScalarFieldEnum = (typeof SessionTypeScalarFieldEnum)[keyof typeof SessionTypeScalarFieldEnum]
+
+
+export const SessionInstanceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  sessionTypeId: 'sessionTypeId',
+  locationId: 'locationId',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  capacity: 'capacity',
+  status: 'status',
+  instructor: 'instructor',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SessionInstanceScalarFieldEnum = (typeof SessionInstanceScalarFieldEnum)[keyof typeof SessionInstanceScalarFieldEnum]
+
+
+export const BookingScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  memberId: 'memberId',
+  sessionInstanceId: 'sessionInstanceId',
+  status: 'status',
+  bookedAt: 'bookedAt',
+  attendedAt: 'attendedAt',
+  cancelledAt: 'cancelledAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const MovementEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  memberId: 'memberId',
+  sessionInstanceId: 'sessionInstanceId',
+  type: 'type',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type MovementEventScalarFieldEnum = (typeof MovementEventScalarFieldEnum)[keyof typeof MovementEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull'
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -115,4 +208,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull',
+  AnyNull: 'AnyNull'
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

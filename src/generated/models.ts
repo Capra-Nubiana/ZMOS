@@ -9,4 +9,9 @@
  */
 export type * from './models/Tenant'
 export type * from './models/Member'
+export type * from './models/Location'
+export type * from './models/SessionType'
+export type * from './models/SessionInstance'
+export type * from './models/Booking'
+export type * from './models/MovementEvent'
 export type * from './commonInputTypes'

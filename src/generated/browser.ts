@@ -26,3 +26,28 @@ export type Tenant = Prisma.TenantModel
  * 
  */
 export type Member = Prisma.MemberModel
+/**
+ * Model Location
+ * 
+ */
+export type Location = Prisma.LocationModel
+/**
+ * Model SessionType
+ * 
+ */
+export type SessionType = Prisma.SessionTypeModel
+/**
+ * Model SessionInstance
+ * 
+ */
+export type SessionInstance = Prisma.SessionInstanceModel
+/**
+ * Model Booking
+ * 
+ */
+export type Booking = Prisma.BookingModel
+/**
+ * Model MovementEvent
+ * 
+ */
+export type MovementEvent = Prisma.MovementEventModel

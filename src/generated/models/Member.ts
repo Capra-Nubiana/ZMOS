@@ -198,6 +198,8 @@ export type MemberWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  bookings?: Prisma.BookingListRelationFilter
+  movementEvents?: Prisma.MovementEventListRelationFilter
 }
 
 export type MemberOrderByWithRelationInput = {
@@ -209,6 +211,8 @@ export type MemberOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
+  bookings?: Prisma.BookingOrderByRelationAggregateInput
+  movementEvents?: Prisma.MovementEventOrderByRelationAggregateInput
 }
 
 export type MemberWhereUniqueInput = Prisma.AtLeast<{
@@ -224,6 +228,8 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  bookings?: Prisma.BookingListRelationFilter
+  movementEvents?: Prisma.MovementEventListRelationFilter
 }, "id" | "email_tenantId">
 
 export type MemberOrderByWithAggregationInput = {
@@ -260,6 +266,8 @@ export type MemberCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembersInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutMemberInput
+  movementEvents?: Prisma.MovementEventCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateInput = {
@@ -270,6 +278,8 @@ export type MemberUncheckedCreateInput = {
   name?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutMemberInput
+  movementEvents?: Prisma.MovementEventUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUpdateInput = {
@@ -280,6 +290,8 @@ export type MemberUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembersNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutMemberNestedInput
+  movementEvents?: Prisma.MovementEventUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateInput = {
@@ -290,6 +302,8 @@ export type MemberUncheckedUpdateInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutMemberNestedInput
+  movementEvents?: Prisma.MovementEventUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateManyInput = {
@@ -366,6 +380,11 @@ export type MemberMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type MemberScalarRelationFilter = {
+  is?: Prisma.MemberWhereInput
+  isNot?: Prisma.MemberWhereInput
+}
+
 export type MemberCreateNestedManyWithoutTenantInput = {
   create?: Prisma.XOR<Prisma.MemberCreateWithoutTenantInput, Prisma.MemberUncheckedCreateWithoutTenantInput> | Prisma.MemberCreateWithoutTenantInput[] | Prisma.MemberUncheckedCreateWithoutTenantInput[]
   connectOrCreate?: Prisma.MemberCreateOrConnectWithoutTenantInput | Prisma.MemberCreateOrConnectWithoutTenantInput[]
@@ -412,6 +431,34 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type MemberCreateNestedOneWithoutBookingsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutBookingsInput, Prisma.MemberUncheckedCreateWithoutBookingsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutBookingsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutBookingsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutBookingsInput, Prisma.MemberUncheckedCreateWithoutBookingsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutBookingsInput
+  upsert?: Prisma.MemberUpsertWithoutBookingsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutBookingsInput, Prisma.MemberUpdateWithoutBookingsInput>, Prisma.MemberUncheckedUpdateWithoutBookingsInput>
+}
+
+export type MemberCreateNestedOneWithoutMovementEventsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutMovementEventsInput, Prisma.MemberUncheckedCreateWithoutMovementEventsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutMovementEventsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutMovementEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutMovementEventsInput, Prisma.MemberUncheckedCreateWithoutMovementEventsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutMovementEventsInput
+  upsert?: Prisma.MemberUpsertWithoutMovementEventsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutMovementEventsInput, Prisma.MemberUpdateWithoutMovementEventsInput>, Prisma.MemberUncheckedUpdateWithoutMovementEventsInput>
+}
+
 export type MemberCreateWithoutTenantInput = {
   id?: string
   email: string
@@ -419,6 +466,8 @@ export type MemberCreateWithoutTenantInput = {
   name?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bookings?: Prisma.BookingCreateNestedManyWithoutMemberInput
+  movementEvents?: Prisma.MovementEventCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutTenantInput = {
@@ -428,6 +477,8 @@ export type MemberUncheckedCreateWithoutTenantInput = {
   name?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutMemberInput
+  movementEvents?: Prisma.MovementEventUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutTenantInput = {
@@ -469,6 +520,126 @@ export type MemberScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
 }
 
+export type MemberCreateWithoutBookingsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  name?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembersInput
+  movementEvents?: Prisma.MovementEventCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutBookingsInput = {
+  id?: string
+  tenantId: string
+  email: string
+  passwordHash: string
+  name?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  movementEvents?: Prisma.MovementEventUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutBookingsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutBookingsInput, Prisma.MemberUncheckedCreateWithoutBookingsInput>
+}
+
+export type MemberUpsertWithoutBookingsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutBookingsInput, Prisma.MemberUncheckedUpdateWithoutBookingsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutBookingsInput, Prisma.MemberUncheckedCreateWithoutBookingsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutBookingsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutBookingsInput, Prisma.MemberUncheckedUpdateWithoutBookingsInput>
+}
+
+export type MemberUpdateWithoutBookingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembersNestedInput
+  movementEvents?: Prisma.MovementEventUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutBookingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  movementEvents?: Prisma.MovementEventUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberCreateWithoutMovementEventsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  name?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembersInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutMovementEventsInput = {
+  id?: string
+  tenantId: string
+  email: string
+  passwordHash: string
+  name?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutMovementEventsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutMovementEventsInput, Prisma.MemberUncheckedCreateWithoutMovementEventsInput>
+}
+
+export type MemberUpsertWithoutMovementEventsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutMovementEventsInput, Prisma.MemberUncheckedUpdateWithoutMovementEventsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutMovementEventsInput, Prisma.MemberUncheckedCreateWithoutMovementEventsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutMovementEventsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutMovementEventsInput, Prisma.MemberUncheckedUpdateWithoutMovementEventsInput>
+}
+
+export type MemberUpdateWithoutMovementEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembersNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutMovementEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutMemberNestedInput
+}
+
 export type MemberCreateManyTenantInput = {
   id?: string
   email: string
@@ -485,6 +656,8 @@ export type MemberUpdateWithoutTenantInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bookings?: Prisma.BookingUpdateManyWithoutMemberNestedInput
+  movementEvents?: Prisma.MovementEventUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutTenantInput = {
@@ -494,6 +667,8 @@ export type MemberUncheckedUpdateWithoutTenantInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutMemberNestedInput
+  movementEvents?: Prisma.MovementEventUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateManyWithoutTenantInput = {
@@ -506,6 +681,44 @@ export type MemberUncheckedUpdateManyWithoutTenantInput = {
 }
 
 
+/**
+ * Count Type MemberCountOutputType
+ */
+
+export type MemberCountOutputType = {
+  bookings: number
+  movementEvents: number
+}
+
+export type MemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  bookings?: boolean | MemberCountOutputTypeCountBookingsArgs
+  movementEvents?: boolean | MemberCountOutputTypeCountMovementEventsArgs
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberCountOutputType
+   */
+  select?: Prisma.MemberCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountBookingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BookingWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountMovementEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MovementEventWhereInput
+}
+
 
 export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -516,6 +729,9 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  bookings?: boolean | Prisma.Member$bookingsArgs<ExtArgs>
+  movementEvents?: boolean | Prisma.Member$movementEventsArgs<ExtArgs>
+  _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["member"]>
 
 export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -553,6 +769,9 @@ export type MemberSelectScalar = {
 export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "email" | "passwordHash" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  bookings?: boolean | Prisma.Member$bookingsArgs<ExtArgs>
+  movementEvents?: boolean | Prisma.Member$movementEventsArgs<ExtArgs>
+  _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -565,6 +784,8 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name: "Member"
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
+    bookings: Prisma.$BookingPayload<ExtArgs>[]
+    movementEvents: Prisma.$MovementEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -969,6 +1190,8 @@ readonly fields: MemberFieldRefs;
 export interface Prisma__MemberClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  bookings<T extends Prisma.Member$bookingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  movementEvents<T extends Prisma.Member$movementEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$movementEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MovementEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1398,6 +1621,54 @@ export type MemberDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many Members to delete.
    */
   limit?: number
+}
+
+/**
+ * Member.bookings
+ */
+export type Member$bookingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Booking
+   */
+  select?: Prisma.BookingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Booking
+   */
+  omit?: Prisma.BookingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BookingInclude<ExtArgs> | null
+  where?: Prisma.BookingWhereInput
+  orderBy?: Prisma.BookingOrderByWithRelationInput | Prisma.BookingOrderByWithRelationInput[]
+  cursor?: Prisma.BookingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BookingScalarFieldEnum | Prisma.BookingScalarFieldEnum[]
+}
+
+/**
+ * Member.movementEvents
+ */
+export type Member$movementEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MovementEvent
+   */
+  select?: Prisma.MovementEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MovementEvent
+   */
+  omit?: Prisma.MovementEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MovementEventInclude<ExtArgs> | null
+  where?: Prisma.MovementEventWhereInput
+  orderBy?: Prisma.MovementEventOrderByWithRelationInput | Prisma.MovementEventOrderByWithRelationInput[]
+  cursor?: Prisma.MovementEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MovementEventScalarFieldEnum | Prisma.MovementEventScalarFieldEnum[]
 }
 
 /**
