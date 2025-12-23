@@ -4,6 +4,7 @@ import { ClsModule } from 'nestjs-cls';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { MoveosModule } from './moveos/moveos.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PrismaService } from './prisma/prisma.service';
 import { TenantMiddleware } from './common/tenant.middleware';
@@ -14,6 +15,7 @@ import { TenantMiddleware } from './common/tenant.middleware';
       global: true,
     }),
     AuthModule,
+    MoveosModule,
   ],
   controllers: [AppController],
   providers: [

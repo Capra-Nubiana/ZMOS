@@ -27,7 +27,473 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
     this._extended = this.$extends({
       query: {
+        // Existing Member entity extensions
         member: {
+          async findUnique({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findFirst({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async create({ args, query }) {
+            return query({
+              ...args,
+              data: {
+                ...args.data,
+                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async update({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async updateMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async upsert({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async delete({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async deleteMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+        },
+
+        // MoveOS Location entity extensions
+        location: {
+          async findUnique({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findFirst({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async create({ args, query }) {
+            return query({
+              ...args,
+              data: {
+                ...args.data,
+                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async update({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async updateMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async upsert({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async delete({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async deleteMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+        },
+
+        // MoveOS SessionType entity extensions
+        sessionType: {
+          async findUnique({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findFirst({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async create({ args, query }) {
+            return query({
+              ...args,
+              data: {
+                ...args.data,
+                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async update({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async updateMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async upsert({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async delete({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async deleteMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+        },
+
+        // MoveOS SessionInstance entity extensions
+        sessionInstance: {
+          async findUnique({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findFirst({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async create({ args, query }) {
+            return query({
+              ...args,
+              data: {
+                ...args.data,
+                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async update({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async updateMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async upsert({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async delete({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async deleteMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+        },
+
+        // MoveOS Booking entity extensions
+        booking: {
+          async findUnique({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findFirst({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async findMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async create({ args, query }) {
+            return query({
+              ...args,
+              data: {
+                ...args.data,
+                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async update({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async updateMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async upsert({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async delete({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async deleteMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: this.cls.get('tenantId'),
+              },
+            });
+          },
+        },
+
+        // MoveOS MovementEvent entity extensions
+        movementEvent: {
           async findUnique({ args, query }) {
             return query({
               ...args,
