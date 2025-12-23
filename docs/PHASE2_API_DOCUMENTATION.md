@@ -12,6 +12,50 @@ Phase 2 implements the complete MoveOS walking skeleton with end-to-end function
 Tenant → Location → SessionType → SessionInstance → Booking → MovementEvent → Streak
 ```
 
+**Total Endpoints Implemented:** 25+ RESTful API endpoints covering the complete movement management lifecycle.
+
+## Complete API Endpoint Reference
+
+### Location Management (6 endpoints)
+- `POST /locations` - Create location
+- `GET /locations` - Get all locations
+- `GET /locations/active` - Get active locations
+- `GET /locations/:id` - Get location by ID
+- `PATCH /locations/:id` - Update location
+- `DELETE /locations/:id` - Soft delete location
+
+### Session Type Management (7 endpoints)
+- `POST /session-types` - Create session type
+- `GET /session-types` - Get all session types
+- `GET /session-types/active` - Get active session types
+- `GET /session-types/category/:category` - Get by category
+- `GET /session-types/:id` - Get session type by ID
+- `PATCH /session-types/:id` - Update session type
+- `DELETE /session-types/:id` - Soft delete session type
+
+### Session Instance Management (8 endpoints)
+- `POST /sessions` - Create session instance
+- `GET /sessions` - Get all sessions (with filters)
+- `GET /sessions/available` - Get available sessions
+- `GET /sessions/:id` - Get session by ID
+- `PATCH /sessions/:id` - Update session
+- `PUT /sessions/:id/cancel` - Cancel session
+- `PUT /sessions/:id/complete` - Complete session
+- `POST /sessions/:id/checkin` - Check in to session
+
+### Booking Management (5 endpoints)
+- `POST /bookings` - Create booking
+- `GET /bookings` - Get all bookings (admin)
+- `GET /bookings/my` - Get my bookings
+- `GET /bookings/:id` - Get booking by ID
+- `DELETE /bookings/:id` - Cancel booking
+
+### Member Operations (4 endpoints)
+- `GET /my/bookings` - Get member bookings
+- `GET /my/streak` - Get member streak info
+- `GET /my/events` - Get member movement events
+- `GET /my/attendance` - Get member attendance history
+
 ## API Architecture
 
 ### Base URL
@@ -37,6 +81,8 @@ All MoveOS endpoints require:
 ---
 
 ## 1. Location Management
+
+**Endpoints:** `POST /locations`, `GET /locations`, `GET /locations/active`, `GET /locations/:id`, `PATCH /locations/:id`, `DELETE /locations/:id`
 
 ### Create Location
 ```http
@@ -82,6 +128,13 @@ GET /locations
   }
 ]
 ```
+
+### Get Active Locations
+```http
+GET /locations/active
+```
+
+**Response:** Same as above, filtered to only active locations
 
 ### Get Active Locations
 ```http
@@ -144,6 +197,8 @@ DELETE /locations/:id
 
 ## 2. Session Type Management
 
+**Endpoints:** `POST /session-types`, `GET /session-types`, `GET /session-types/active`, `GET /session-types/category/:category`, `GET /session-types/:id`, `PATCH /session-types/:id`, `DELETE /session-types/:id`
+
 ### Create Session Type
 ```http
 POST /session-types
@@ -180,6 +235,23 @@ POST /session-types
 ```http
 GET /session-types
 ```
+
+### Get Active Session Types
+```http
+GET /session-types/active
+```
+
+**Response:** Same as above, filtered to only active session types
+
+### Get Session Types by Category
+```http
+GET /session-types/category/:category
+```
+
+**Path Parameters:**
+- `category`: Session category (`class`, `pt`, `group`, `workshop`)
+
+**Response:** Same as above, filtered by category
 
 ### Get Active Session Types
 ```http
@@ -228,6 +300,8 @@ DELETE /session-types/:id
 
 ## 3. Session Instance Management
 
+**Endpoints:** `POST /sessions`, `GET /sessions`, `GET /sessions/available`, `GET /sessions/:id`, `PATCH /sessions/:id`, `PUT /sessions/:id/cancel`, `PUT /sessions/:id/complete`, `POST /sessions/:id/checkin`
+
 ### Create Session Instance
 ```http
 POST /sessions
@@ -267,9 +341,12 @@ GET /sessions
 ```
 
 **Query Parameters:**
+- `date`: Filter by specific date (YYYY-MM-DD)
 - `category`: Filter by session type category
-- `startDate`: Filter sessions from this date
-- `endDate`: Filter sessions until this date
+- `status`: Filter by status (`scheduled`, `cancelled`, `completed`)
+- `locationId`: Filter by location ID
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 20)
 
 ### Get Available Sessions
 ```http
@@ -338,6 +415,34 @@ GET /sessions/:id
 PATCH /sessions/:id
 ```
 
+### Cancel Session Instance
+```http
+PUT /sessions/:id/cancel
+```
+
+**Response:**
+```json
+{
+  "id": "session-uuid",
+  "status": "cancelled",
+  "updatedAt": "2025-12-23T15:00:00Z"
+}
+```
+
+### Complete Session Instance
+```http
+PUT /sessions/:id/complete
+```
+
+**Response:**
+```json
+{
+  "id": "session-uuid",
+  "status": "completed",
+  "updatedAt": "2025-12-24T11:00:00Z"
+}
+```
+
 ### Cancel Session
 ```http
 PUT /sessions/:id/cancel
@@ -387,6 +492,8 @@ POST /sessions/:id/checkin
 ---
 
 ## 4. Booking Management
+
+**Endpoints:** `POST /bookings`, `GET /bookings`, `GET /bookings/my`, `GET /bookings/:id`, `DELETE /bookings/:id`
 
 ### Create Booking
 ```http
@@ -450,7 +557,14 @@ DELETE /bookings/:bookingId
 }
 ```
 
-### Get Member Bookings
+### Get All Bookings (Admin)
+```http
+GET /bookings
+```
+
+**Response:** Array of all bookings with member and session details
+
+### Get My Bookings
 ```http
 GET /my/bookings
 ```
@@ -470,6 +584,18 @@ GET /my/bookings
   }
 ]
 ```
+
+### Get Booking by ID
+```http
+GET /bookings/:id
+```
+
+### Get My Bookings (Alternative)
+```http
+GET /bookings/my
+```
+
+**Note:** This is an alias for `/my/bookings`
 
 ### Get Member Attendance History
 ```http
@@ -501,9 +627,11 @@ GET /my/attendance
 
 ---
 
-## 5. Movement Events & Streaks
+## 5. Member Operations
 
-### Get Member Movement Events
+**Endpoints:** `GET /my/bookings`, `GET /my/streak`, `GET /my/events`, `GET /my/attendance`
+
+### Get Member Bookings
 ```http
 GET /my/events
 ```
@@ -623,6 +751,68 @@ GET /my/attendance
         "status": "attended"
       }
     ]
+  }
+]
+```
+
+### Get Member Streak Info
+```http
+GET /my/streak
+```
+
+**Response:**
+```json
+{
+  "currentStreak": 5,
+  "longestStreak": 12,
+  "recentAttendance": [
+    {
+      "date": "2025-12-23",
+      "count": 1,
+      "sessionTypes": ["HIIT Express"]
+    },
+    {
+      "date": "2025-12-22",
+      "count": 1,
+      "sessionTypes": ["Yoga Flow"]
+    }
+  ],
+  "lastAttendanceDate": "2025-12-23"
+}
+```
+
+### Get Member Movement Events
+```http
+GET /my/events
+```
+
+**Query Parameters:**
+- `type`: Filter by event type (`booking_created`, `class_attendance`, `streak_milestone`, etc.)
+- `limit`: Number of results (default: 50)
+- `offset`: Pagination offset
+
+**Response:**
+```json
+[
+  {
+    "id": "event-uuid",
+    "type": "booking_created",
+    "metadata": {
+      "sessionType": "HIIT Express",
+      "location": "Main Studio",
+      "startTime": "2025-12-24T10:00:00Z"
+    },
+    "createdAt": "2025-12-23T10:00:00Z"
+  },
+  {
+    "id": "event-uuid",
+    "type": "class_attendance",
+    "metadata": {
+      "sessionType": "HIIT Express",
+      "location": "Main Studio",
+      "duration": 30
+    },
+    "createdAt": "2025-12-24T10:30:00Z"
   }
 ]
 ```
