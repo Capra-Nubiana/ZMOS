@@ -1,31 +1,33 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
-
-const { PrismaClient } = require('../generated/client');
+import { PrismaClient } from '@prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
 type PrismaClientType = typeof PrismaClient;
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   private _extended: any;
+  private cls: ClsService;
 
-  constructor(private readonly cls: ClsService) {
+  constructor(cls: ClsService) {
     // Set default DATABASE_URL if not provided
-    if (!process.env.DATABASE_URL) {
-      process.env.DATABASE_URL =
-        'postgresql://user:pass@localhost:5432/zmos_db?schema=public';
-    }
+    const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
 
-    // Create PostgreSQL adapter
-    const connectionString = process.env.DATABASE_URL;
-    const pool = new Pool({ connectionString });
-    const adapter = new PrismaPg(pool);
+    // Prisma 7.x requires an adapter for SQLite
+    const dbPath = dbUrl.replace('file:', '');
+    const adapter = new PrismaBetterSqlite3({ url: dbPath });
 
+    // Pass the adapter to PrismaClient constructor
     super({ adapter });
 
-    this._extended = this.$extends({
+    // Store cls immediately after calling super()
+    this.cls = cls;
+
+    // Initialize extended client - must be done after cls assignment
+    // Capture 'this' reference for use in extensions
+    const self = this;
+    this._extended = (this as any).$extends({
       query: {
         // Existing Member entity extensions
         member: {
@@ -34,7 +36,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -44,7 +46,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -54,7 +56,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -64,7 +66,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               data: {
                 ...args.data,
-                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+                tenantId: args.data.tenantId ?? self.cls.get('tenantId'),
               },
             });
           },
@@ -74,7 +76,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -84,7 +86,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -94,7 +96,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -104,7 +106,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -114,7 +116,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -127,7 +129,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -137,7 +139,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -147,7 +149,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -157,7 +159,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               data: {
                 ...args.data,
-                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+                tenantId: args.data.tenantId ?? self.cls.get('tenantId'),
               },
             });
           },
@@ -167,7 +169,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -177,7 +179,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -187,7 +189,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -197,7 +199,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -207,7 +209,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -220,7 +222,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -230,7 +232,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -240,7 +242,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -250,7 +252,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               data: {
                 ...args.data,
-                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+                tenantId: args.data.tenantId ?? self.cls.get('tenantId'),
               },
             });
           },
@@ -260,7 +262,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -270,7 +272,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -280,7 +282,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -290,7 +292,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -300,7 +302,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -313,7 +315,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -323,7 +325,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -333,7 +335,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -343,7 +345,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               data: {
                 ...args.data,
-                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+                tenantId: args.data.tenantId ?? self.cls.get('tenantId'),
               },
             });
           },
@@ -353,7 +355,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -363,7 +365,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -373,7 +375,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -383,7 +385,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -393,7 +395,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -406,7 +408,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -416,7 +418,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -426,7 +428,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -436,7 +438,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               data: {
                 ...args.data,
-                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+                tenantId: args.data.tenantId ?? self.cls.get('tenantId'),
               },
             });
           },
@@ -446,7 +448,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -456,7 +458,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -466,7 +468,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -476,7 +478,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -486,7 +488,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -499,7 +501,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -509,7 +511,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -519,7 +521,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -529,7 +531,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               data: {
                 ...args.data,
-                tenantId: args.data.tenantId ?? this.cls.get('tenantId'),
+                tenantId: args.data.tenantId ?? self.cls.get('tenantId'),
               },
             });
           },
@@ -539,7 +541,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -549,7 +551,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -559,7 +561,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -569,7 +571,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },
@@ -579,7 +581,65 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               ...args,
               where: {
                 ...args.where,
-                tenantId: this.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId'),
+              },
+            });
+          },
+        },
+        // MoveOS Invitation entity extensions
+        invitation: {
+          async findUnique({ args, query }) {
+            // Some findUnique might be public (by code), so we don't always filter by tenantId
+            // but if it's there, we should respect it.
+            return query(args);
+          },
+
+          async findFirst({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: self.cls.get('tenantId') || args.where?.tenantId,
+              },
+            });
+          },
+
+          async findMany({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: self.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async create({ args, query }) {
+            return query({
+              ...args,
+              data: {
+                ...args.data,
+                tenantId: args.data.tenantId ?? self.cls.get('tenantId'),
+              },
+            });
+          },
+
+          async update({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: self.cls.get('tenantId') || args.where?.tenantId,
+              },
+            });
+          },
+
+          async delete({ args, query }) {
+            return query({
+              ...args,
+              where: {
+                ...args.where,
+                tenantId: self.cls.get('tenantId'),
               },
             });
           },

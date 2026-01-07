@@ -76,7 +76,7 @@ export class BookingService {
         data: {
           sessionInstanceId,
           memberId,
-          tenantId: this.prisma.tenantId,
+          tenantId: this.prisma.tenantId!,
           notes: createBookingDto.notes,
         },
         include: {
@@ -102,7 +102,7 @@ export class BookingService {
           memberId,
           sessionInstanceId,
           type: 'booking_created',
-          tenantId: this.prisma.tenantId,
+          tenantId: this.prisma.tenantId!,
           metadata: {
             sessionType: sessionInstance.sessionType.name,
             location: sessionInstance.location.name,
@@ -231,7 +231,7 @@ export class BookingService {
           memberId: booking.memberId,
           sessionInstanceId: booking.sessionInstanceId,
           type: 'booking_cancelled',
-          tenantId: this.prisma.tenantId,
+          tenantId: this.prisma.tenantId!,
           metadata: {
             sessionType: booking.sessionInstance.sessionType.name,
             location: booking.sessionInstance.location.name,
@@ -318,7 +318,7 @@ export class BookingService {
           memberId,
           sessionInstanceId,
           type: 'class_attendance',
-          tenantId: this.prisma.tenantId,
+          tenantId: this.prisma.tenantId!,
           metadata: {
             sessionType: booking.sessionInstance.sessionType.name,
             location: booking.sessionInstance.location.name,
@@ -353,6 +353,129 @@ export class BookingService {
       orderBy: {
         createdAt: 'desc',
       },
+    });
+  }
+
+  /**
+   * Get booking history with pagination
+   */
+  async getBookingHistory(
+    memberId: string,
+    options: {
+      page?: number;
+      limit?: number;
+      status?: string;
+    } = {},
+  ) {
+    const { page = 1, limit = 20, status } = options;
+    const skip = (page - 1) * limit;
+
+    const where: any = {
+      memberId,
+      sessionInstance: {
+        startTime: { lt: new Date() }, // Past sessions only
+      },
+    };
+
+    if (status) {
+      where.status = status;
+    }
+
+    const [bookings, total] = await Promise.all([
+      this.prisma.extended.booking.findMany({
+        where,
+        include: {
+          sessionInstance: {
+            include: {
+              sessionType: true,
+              location: true,
+            },
+          },
+        },
+        orderBy: {
+          sessionInstance: {
+            startTime: 'desc',
+          },
+        },
+        skip,
+        take: limit,
+      }),
+      this.prisma.extended.booking.count({ where }),
+    ]);
+
+    return {
+      bookings,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+      },
+    };
+  }
+
+  /**
+   * Mark booking as no-show (admin only)
+   */
+  async markNoShow(bookingId: string) {
+    const booking = await this.findOne(bookingId);
+
+    if (booking.status !== 'confirmed') {
+      throw new BadRequestException(
+        `Cannot mark as no-show. Current status: ${booking.status}`,
+      );
+    }
+
+    // Check if session has started
+    const sessionStartTime = new Date(booking.sessionInstance.startTime);
+    const now = new Date();
+
+    if (now < sessionStartTime) {
+      throw new BadRequestException(
+        'Cannot mark as no-show before session starts',
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updatedBooking = await tx.booking.update({
+        where: { id: bookingId },
+        data: {
+          status: 'no_show',
+        },
+        include: {
+          sessionInstance: {
+            include: {
+              sessionType: true,
+              location: true,
+            },
+          },
+          member: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      // Create MovementEvent for no-show
+      await tx.movementEvent.create({
+        data: {
+          memberId: booking.memberId,
+          sessionInstanceId: booking.sessionInstanceId,
+          type: 'no_show',
+          tenantId: this.prisma.tenantId!,
+          metadata: {
+            sessionType: booking.sessionInstance.sessionType.name,
+            location: booking.sessionInstance.location.name,
+            markedAt: new Date().toISOString(),
+          },
+        },
+      });
+
+      return updatedBooking;
     });
   }
 }

@@ -6,14 +6,24 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly prisma: PrismaService) {
+    // Validate JWT_SECRET is configured
+    if (!process.env.JWT_SECRET) {
+      throw new Error(
+        'JWT_SECRET is not configured. Please set JWT_SECRET environment variable.',
+      );
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
+      secretOrKey: process.env.JWT_SECRET,
     });
   }
 
   async validate(payload: any) {
+    console.log('🔐 [JwtStrategy] validate() called');
+    console.log('   Payload:', JSON.stringify(payload, null, 2));
+
     // Verify member exists and belongs to the current tenant
     const member = await this.prisma.extended.member.findUnique({
       where: { id: payload.sub },
@@ -22,13 +32,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         email: true,
         name: true,
         tenantId: true,
+        role: true,
       },
     });
 
     if (!member) {
+      console.log('❌ [JwtStrategy] Member not found with ID:', payload.sub);
       return null;
     }
 
-    return member;
+    console.log(
+      '✅ [JwtStrategy] Member found:',
+      member.email,
+      'Role:',
+      member.role,
+    );
+    return { ...member, sub: member.id };
   }
 }
