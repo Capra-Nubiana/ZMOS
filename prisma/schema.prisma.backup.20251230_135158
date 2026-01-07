@@ -1,0 +1,236 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Existing relations
+  members   Member[]
+
+  // MoveOS relations
+  locations        Location[]
+  sessionTypes     SessionType[]
+  sessionInstances SessionInstance[]
+  bookings         Booking[]
+  movementEvents   MovementEvent[]
+  waitlists        Waitlist[]
+  favorites        Favorite[]
+}
+
+model Member {
+  id           String     @id @default(cuid())
+  tenantId     String
+  email        String
+  passwordHash String?
+  name         String?
+  googleId     String?    @unique
+  avatarUrl    String?
+  role         MemberRole @default(MEMBER) // Member role within tenant
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // MoveOS relations
+  bookings       Booking[]
+  movementEvents MovementEvent[]
+  waitlists      Waitlist[]
+  favorites      Favorite[]
+
+  @@unique([email, tenantId])
+  @@index([tenantId])
+  @@index([role])
+}
+
+// Member roles within a tenant
+enum MemberRole {
+  OWNER   // Tenant owner (created the gym/studio)
+  ADMIN   // Administrator (can manage most things)
+  TRAINER // Trainer/instructor (can manage sessions)
+  MEMBER  // Regular member (can book and attend)
+}
+
+// ============================================================================
+// MoveOS Core Entities - Phase 2 Walking Skeleton
+// ============================================================================
+
+model Location {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String   // Display name (e.g., "Main Studio", "Downtown Location")
+  address   String?  // Full address for maps/navigation
+  capacity  Int?     // Maximum concurrent participants
+  timezone  String   @default("UTC") // For scheduling across timezones
+  isActive  Boolean  @default(true)  // Soft delete alternative
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessionInstances SessionInstance[]
+
+  // Indexes
+  @@index([tenantId])
+  @@index([isActive])
+  @@unique([tenantId, name]) // Prevent duplicate names within tenant
+}
+
+model SessionType {
+  id          String @id @default(cuid())
+  tenantId    String
+  name        String // Display name (e.g., "HIIT Class", "Yoga Flow")
+  description String? // Detailed description for members
+  durationMin Int    // Session duration in minutes
+  category    String // 'class', 'pt', 'group', 'workshop'
+  maxCapacity Int?   // Default capacity (can be overridden per instance)
+  difficulty  String @default("intermediate") // 'beginner', 'intermediate', 'advanced'
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessionInstances SessionInstance[]
+  favorites        Favorite[]
+
+  // Indexes
+  @@index([tenantId])
+  @@index([category])
+  @@index([isActive])
+  @@unique([tenantId, name])
+}
+
+model SessionInstance {
+  id            String   @id @default(cuid())
+  tenantId      String
+  sessionTypeId String
+  locationId    String
+  startTime     DateTime // When session begins
+  endTime       DateTime // When session ends (calculated or explicit)
+  capacity      Int?     // Override SessionType capacity
+  status        String   @default("scheduled") // 'scheduled', 'cancelled', 'completed'
+  instructor    String?  // Instructor name (future: link to staff entity)
+  notes         String?  // Special instructions or changes
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  tenant         Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessionType    SessionType       @relation(fields: [sessionTypeId], references: [id], onDelete: Cascade)
+  location       Location          @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  bookings       Booking[]
+  movementEvents MovementEvent[]
+  waitlists      Waitlist[]
+
+  // Indexes
+  @@index([tenantId])
+  @@index([startTime])
+  @@index([status])
+  @@index([sessionTypeId])
+  @@index([locationId])
+  @@unique([locationId, startTime]) // Prevent double-booking locations
+}
+
+model Booking {
+  id               String   @id @default(cuid())
+  tenantId         String
+  memberId         String
+  sessionInstanceId String
+  status           String   @default("confirmed") // 'confirmed', 'cancelled', 'no_show', 'attended'
+  bookedAt         DateTime @default(now()) // When booking was made
+  attendedAt       DateTime? // When member checked in
+  cancelledAt      DateTime? // When booking was cancelled
+  notes            String?  // Special requests or notes
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member          Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  sessionInstance SessionInstance @relation(fields: [sessionInstanceId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([sessionInstanceId])
+  @@index([status])
+  @@index([bookedAt])
+  @@unique([memberId, sessionInstanceId]) // Prevent double-booking
+}
+
+model MovementEvent {
+  id               String   @id @default(cuid())
+  tenantId         String
+  memberId         String
+  sessionInstanceId String?
+  type             String   // Event type classification
+  metadata         Json?    // Flexible event data
+  createdAt        DateTime @default(now())
+
+  // Relations
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member          Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  sessionInstance SessionInstance? @relation(fields: [sessionInstanceId], references: [id])
+
+  // Indexes
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([createdAt])
+  @@index([type])
+  @@index([sessionInstanceId])
+}
+
+// Waitlist for full sessions
+model Waitlist {
+  id                String   @id @default(cuid())
+  tenantId          String
+  memberId          String
+  sessionInstanceId String
+  position          Int      // Position in waitlist (auto-calculated)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member          Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  sessionInstance SessionInstance @relation(fields: [sessionInstanceId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([sessionInstanceId])
+  @@unique([memberId, sessionInstanceId]) // Member can only be on waitlist once per session
+}
+
+// Member favorites for session types
+model Favorite {
+  id            String   @id @default(cuid())
+  tenantId      String
+  memberId      String
+  sessionTypeId String
+  createdAt     DateTime @default(now())
+
+  // Relations
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member      Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  sessionType SessionType @relation(fields: [sessionTypeId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([sessionTypeId])
+  @@unique([memberId, sessionTypeId]) // Member can only favorite a session type once
+}

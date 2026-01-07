@@ -12,7 +12,7 @@ export class SessionTypeService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createSessionTypeDto: CreateSessionTypeDto) {
-    const { name, tenantId } = createSessionTypeDto;
+    const { name } = createSessionTypeDto;
 
     // Check for duplicate name within tenant
     const existingSessionType =
@@ -32,7 +32,7 @@ export class SessionTypeService {
     return this.prisma.extended.sessionType.create({
       data: {
         ...createSessionTypeDto,
-        tenantId: tenantId ?? this.prisma.tenantId,
+        tenantId: this.prisma.tenantId,
       },
     });
   }

@@ -5,47 +5,101 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
+// ============================================================================
+// ZMOS Core Models - Following Official Naming Conventions
+// Domain: MOV_ (MoveOS - Provider & Operations)
+// ============================================================================
+
 model Tenant {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  createdAt DateTime @default(now()) @updatedAt
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(cuid()) @map("TEN_ID")
+  name      String   @map("TEN_NAME")
+  code      String?  @unique @map("TEN_CODE") // Unique gym code (e.g., "GYM0001", "GYM0002")
+  createdAt DateTime @default(now()) @map("TEN_CREATED_AT")
+  updatedAt DateTime @updatedAt @map("TEN_UPDATED_AT")
 
   // Existing relations
-  members   Member[]
+  members Member[]
 
   // MoveOS relations
-  locations       Location[]
-  sessionTypes    SessionType[]
+  locations        Location[]
+  sessionTypes     SessionType[]
   sessionInstances SessionInstance[]
-  bookings        Booking[]
+  bookings         Booking[]
   movementEvents   MovementEvent[]
+  waitlists        Waitlist[]
+  favorites        Favorite[]
+  invitations      Invitation[]
+
+  @@index([code])
+  @@map("MOV_TENANT")
 }
 
 model Member {
-  id           String   @id @default(uuid()) @db.Uuid
-  tenantId     String   @db.Uuid
-  email        String
-  passwordHash String
-  name         String?
-  createdAt    DateTime @default(now()) @updatedAt
-  updatedAt    DateTime @updatedAt
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id           String     @id @default(cuid()) @map("MEM_ID")
+  tenantId     String     @map("MEM_TENANT_ID")
+  email        String     @map("MEM_EMAIL")
+  passwordHash String?    @map("MEM_PASSWORD_HASH")
+  name         String?    @map("MEM_NAME")
+  googleId     String?    @unique @map("MEM_GOOGLE_ID")
+  avatarUrl    String?    @map("MEM_AVATAR_URL")
+  role         MemberRole @default(MEMBER) @map("MEM_ROLE") // Member role within tenant
+  createdAt    DateTime   @default(now()) @map("MEM_CREATED_AT")
+  updatedAt    DateTime   @updatedAt @map("MEM_UPDATED_AT")
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Extended Profile Fields (JSON for flexibility)
+  phoneNumber       String? @map("MEM_PHONE_NUMBER")
+  dateOfBirth       String? @map("MEM_DATE_OF_BIRTH")
+  gender            String? @map("MEM_GENDER")
+  profilePhoto      String? @map("MEM_PROFILE_PHOTO")
+
+  // Trainer-specific fields
+  trainerCode       String? @unique @map("MEM_TRAINER_CODE") // Unique trainer code (e.g., "TR0001", "TR0002")
+  trainerType       String? @map("MEM_TRAINER_TYPE") // 'freelance' or 'gym_affiliated'
+
+  // Role-specific profile data (stored as JSON for flexibility)
+  ownerProfile      Json?   @map("MEM_OWNER_PROFILE") // Business info, amenities, hours
+  trainerProfile    Json?   @map("MEM_TRAINER_PROFILE") // Bio, certifications, specializations, businessHours
+  clientProfile     Json?   @map("MEM_CLIENT_PROFILE") // Fitness goals, experience level, health info
+  staffProfile      Json?   @map("MEM_STAFF_PROFILE") // Department, position, shift, responsibilities
+
+  // Refresh token
+  refreshToken      String? @map("MEM_REFRESH_TOKEN")
+
+  // Profile completion tracking
+  profileCompleted  Boolean @default(false) @map("MEM_PROFILE_COMPLETED")
+  onboardingStep    Int?    @map("MEM_ONBOARDING_STEP") // Track current onboarding step
 
   // MoveOS relations
-  bookings      Booking[]
+  bookings       Booking[]
   movementEvents MovementEvent[]
+  waitlists      Waitlist[]
+  favorites      Favorite[]
+  sentInvitations Invitation[] @relation("SentInvitations")
 
   @@unique([email, tenantId])
   @@index([tenantId])
+  @@index([role])
+  @@index([profileCompleted])
+  @@index([trainerCode])
+  @@index([trainerType])
+  @@map("MOV_MEMBER")
+}
+
+// Member roles within a tenant
+enum MemberRole {
+  OWNER   // Tenant owner (created the gym/studio)
+  ADMIN   // Administrator (can manage most things)
+  TRAINER // Trainer/instructor (can manage sessions)
+  MEMBER  // Regular member (can book and attend)
+  STAFF   // Staff member (front desk, maintenance, etc.)
 }
 
 // ============================================================================
@@ -53,92 +107,175 @@ model Member {
 // ============================================================================
 
 model Location {
-  id        String   @id @default(uuid()) @db.Uuid
-  tenantId  String   @db.Uuid
-  name      String   // Display name (e.g., "Main Studio", "Downtown Location")
-  address   String?  // Full address for maps/navigation
-  capacity  Int?     // Maximum concurrent participants
-  timezone  String   @default("UTC") // For scheduling across timezones
-  isActive  Boolean  @default(true)  // Soft delete alternative
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(cuid()) @map("LOC_ID")
+  tenantId  String   @map("LOC_TENANT_ID")
+  name      String   @map("LOC_NAME") // Display name (e.g., "Main Studio", "Downtown Location")
+
+  // Address components (hierarchical)
+  address      String? @map("LOC_ADDRESS") // Full address for maps/navigation
+  streetNumber String? @map("LOC_STREET_NUMBER")
+  streetName   String? @map("LOC_STREET_NAME")
+  city         String? @map("LOC_CITY")
+  county       String? @map("LOC_COUNTY") // County/District
+  province     String? @map("LOC_PROVINCE") // State/Province/Region
+  postalCode   String? @map("LOC_POSTAL_CODE")
+  country      String? @map("LOC_COUNTRY") // ISO country code (e.g., "ZA", "US", "GB")
+
+  // Geographic coordinates (for maps, weather, hiking routes)
+  latitude  Float?  @map("LOC_LATITUDE")
+  longitude Float?  @map("LOC_LONGITUDE")
+  elevation Float?  @map("LOC_ELEVATION") // Meters above sea level (for hiking)
+
+  // Location metadata
+  capacity     Int?     @map("LOC_CAPACITY") // Maximum concurrent participants
+  locationType String   @default("indoor") @map("LOC_TYPE") // 'indoor', 'outdoor', 'hybrid', 'virtual'
+  timezone     String   @default("UTC") @map("LOC_TIMEZONE") // For scheduling across timezones
+
+  // Weather & outdoor activity support
+  requiresWeatherCheck Boolean @default(false) @map("LOC_REQUIRES_WEATHER") // For outdoor locations
+  weatherAlertEnabled  Boolean @default(false) @map("LOC_WEATHER_ALERT") // Send weather alerts
+
+  // Corporate/Enterprise support
+  corporateId     String? @map("LOC_CORPORATE_ID") // Link to corporate entity
+  buildingName    String? @map("LOC_BUILDING_NAME") // For corporate/campus locations
+  floor           String? @map("LOC_FLOOR") // Floor number/name
+  roomNumber      String? @map("LOC_ROOM_NUMBER")
+  accessInstructions String? @map("LOC_ACCESS_INSTRUCTIONS") // How to access the location
+
+  // Facility Services & Amenities
+  amenities       String? @map("LOC_AMENITIES") // JSON array of amenity IDs (e.g., ["WIFI", "PARKING", "SHOWERS"])
+  equipment       String? @map("LOC_EQUIPMENT") // JSON array of available equipment (e.g., ["TREADMILL", "WEIGHTS", "YOGA_MATS"])
+  services        String? @map("LOC_SERVICES") // JSON array of services offered (e.g., ["PERSONAL_TRAINING", "GROUP_CLASSES", "NUTRITION"])
+  description     String? @map("LOC_DESCRIPTION") // Detailed facility description
+  photos          String? @map("LOC_PHOTOS") // JSON array of photo URLs
+  operatingHours  String? @map("LOC_OPERATING_HOURS") // JSON object { "monday": {"open": "06:00", "close": "22:00"}, ... }
+
+  isActive  Boolean  @default(true) @map("LOC_IS_ACTIVE") // Soft delete alternative
+  createdAt DateTime @default(now()) @map("LOC_CREATED_AT")
+  updatedAt DateTime @updatedAt @map("LOC_UPDATED_AT")
 
   // Relations
-  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   sessionInstances SessionInstance[]
 
   // Indexes
+  @@unique([tenantId, name]) // Prevent duplicate names within tenant
   @@index([tenantId])
   @@index([isActive])
-  @@unique([tenantId, name]) // Prevent duplicate names within tenant
+  @@index([country, province, city]) // Geographic queries
+  @@index([latitude, longitude]) // Geospatial queries
+  @@index([corporateId]) // Corporate location grouping
+  @@index([locationType]) // Filter by type
+  @@map("MOV_LOCATION")
 }
 
 model SessionType {
-  id          String @id @default(uuid()) @db.Uuid
-  tenantId    String @db.Uuid
-  name        String // Display name (e.g., "HIIT Class", "Yoga Flow")
-  description String? // Detailed description for members
-  durationMin Int    // Session duration in minutes
-  category    String // 'class', 'pt', 'group', 'workshop'
-  maxCapacity Int?   // Default capacity (can be overridden per instance)
-  difficulty  String @default("intermediate") // 'beginner', 'intermediate', 'advanced'
-  isActive    Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String  @id @default(cuid()) @map("STY_ID")
+  tenantId    String  @map("STY_TENANT_ID")
+  name        String  @map("STY_NAME") // Display name (e.g., "HIIT Class", "Yoga Flow", "Mountain Hiking")
+  description String? @map("STY_DESCRIPTION") // Detailed description for members
+  durationMin Int     @map("STY_DURATION_MIN") // Session duration in minutes
+  category    String  @map("STY_CATEGORY") // 'class', 'pt', 'group', 'workshop', 'outdoor', 'hiking', 'corporate'
+  maxCapacity Int?    @map("STY_MAX_CAPACITY") // Default capacity (can be overridden per instance)
+  difficulty  String  @default("intermediate") @map("STY_DIFFICULTY") // 'beginner', 'intermediate', 'advanced'
+
+  // Outdoor activity support
+  isOutdoor           Boolean @default(false) @map("STY_IS_OUTDOOR") // Outdoor activity flag
+  requiresWeather     Boolean @default(false) @map("STY_REQUIRES_WEATHER") // Check weather before session
+  weatherConditions   String? @map("STY_WEATHER_CONDITIONS") // Required weather (e.g., "clear", "no_rain")
+  temperatureMin      Float?  @map("STY_TEMP_MIN") // Minimum safe temperature (Celsius)
+  temperatureMax      Float?  @map("STY_TEMP_MAX") // Maximum safe temperature (Celsius)
+
+  // Equipment & requirements
+  equipmentRequired   String? @map("STY_EQUIPMENT") // JSON list of required equipment
+  fitnessLevel        String? @map("STY_FITNESS_LEVEL") // Required fitness level for outdoor activities
+
+  // Corporate wellness support
+  corporateApproved   Boolean @default(true) @map("STY_CORPORATE_APPROVED") // Available for corporate programs
+  creditPoints        Int?    @map("STY_CREDIT_POINTS") // Wellness points/credits
+
+  isActive    Boolean @default(true) @map("STY_IS_ACTIVE")
+  createdAt   DateTime @default(now()) @map("STY_CREATED_AT")
+  updatedAt   DateTime @updatedAt @map("STY_UPDATED_AT")
 
   // Relations
-  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   sessionInstances SessionInstance[]
+  favorites        Favorite[]
 
   // Indexes
+  @@unique([tenantId, name])
   @@index([tenantId])
   @@index([category])
   @@index([isActive])
-  @@unique([tenantId, name])
+  @@index([isOutdoor])
+  @@index([corporateApproved])
+  @@map("MOV_SESSION_TYPE")
 }
 
 model SessionInstance {
-  id            String   @id @default(uuid()) @db.Uuid
-  tenantId      String   @db.Uuid
-  sessionTypeId String   @db.Uuid
-  locationId    String   @db.Uuid
-  startTime     DateTime // When session begins
-  endTime       DateTime // When session ends (calculated or explicit)
-  capacity      Int?     // Override SessionType capacity
-  status        String   @default("scheduled") // 'scheduled', 'cancelled', 'completed'
-  instructor    String?  // Instructor name (future: link to staff entity)
-  notes         String?  // Special instructions or changes
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id            String   @id @default(cuid()) @map("SIN_ID")
+  tenantId      String   @map("SIN_TENANT_ID")
+  sessionTypeId String   @map("SIN_SESSION_TYPE_ID")
+  locationId    String   @map("SIN_LOCATION_ID")
+  startTime     DateTime @map("SIN_START_TIME") // When session begins
+  endTime       DateTime @map("SIN_END_TIME") // When session ends (calculated or explicit)
+  capacity      Int?     @map("SIN_CAPACITY") // Override SessionType capacity
+  status        String   @default("scheduled") @map("SIN_STATUS") // 'scheduled', 'cancelled', 'completed', 'weather_hold'
+  instructor    String?  @map("SIN_INSTRUCTOR") // Instructor name (future: link to staff entity)
+  notes         String?  @map("SIN_NOTES") // Special instructions or changes
+
+  // Weather data (for outdoor sessions)
+  weatherChecked    Boolean  @default(false) @map("SIN_WEATHER_CHECKED") // Weather check performed
+  weatherSafe       Boolean? @map("SIN_WEATHER_SAFE") // Safe weather conditions
+  weatherData       Json?    @map("SIN_WEATHER_DATA") // Weather API response (temp, conditions, etc.)
+  weatherCheckedAt  DateTime? @map("SIN_WEATHER_CHECKED_AT") // When weather was last checked
+  weatherAlertSent  Boolean  @default(false) @map("SIN_WEATHER_ALERT_SENT") // Alert sent to participants
+
+  // Outdoor session specifics
+  meetingPoint      String? @map("SIN_MEETING_POINT") // Where to meet for outdoor activities
+  routeDetails      Json?   @map("SIN_ROUTE_DETAILS") // Hiking route, distance, elevation gain
+  alternativeVenue  String? @map("SIN_ALTERNATIVE_VENUE") // Backup indoor location if weather fails
+
+  // Corporate wellness
+  corporateSessionId String? @map("SIN_CORPORATE_ID") // Link to corporate wellness program
+  pointsAwarded      Int?    @map("SIN_POINTS_AWARDED") // Wellness points for attendance
+
+  createdAt     DateTime @default(now()) @map("SIN_CREATED_AT")
+  updatedAt     DateTime @updatedAt @map("SIN_UPDATED_AT")
 
   // Relations
-  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  sessionType SessionType @relation(fields: [sessionTypeId], references: [id], onDelete: Cascade)
-  location    Location   @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  bookings    Booking[]
+  tenant         Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessionType    SessionType       @relation(fields: [sessionTypeId], references: [id], onDelete: Cascade)
+  location       Location          @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  bookings       Booking[]
   movementEvents MovementEvent[]
+  waitlists      Waitlist[]
 
   // Indexes
+  @@unique([locationId, startTime]) // Prevent double-booking locations
   @@index([tenantId])
   @@index([startTime])
   @@index([status])
   @@index([sessionTypeId])
   @@index([locationId])
-  @@unique([locationId, startTime]) // Prevent double-booking locations
+  @@index([weatherSafe]) // Query sessions by weather status
+  @@index([corporateSessionId]) // Corporate session filtering
+  @@map("MOV_SESSION_INSTANCE")
 }
 
 model Booking {
-  id               String   @id @default(uuid()) @db.Uuid
-  tenantId         String   @db.Uuid
-  memberId         String   @db.Uuid
-  sessionInstanceId String  @db.Uuid
-  status           String   @default("confirmed") // 'confirmed', 'cancelled', 'no_show', 'attended'
-  bookedAt         DateTime @default(now()) // When booking was made
-  attendedAt       DateTime? // When member checked in
-  cancelledAt      DateTime? // When booking was cancelled
-  notes            String?  // Special requests or notes
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                String    @id @default(cuid()) @map("BOK_ID")
+  tenantId          String    @map("BOK_TENANT_ID")
+  memberId          String    @map("BOK_MEMBER_ID")
+  sessionInstanceId String    @map("BOK_SESSION_INSTANCE_ID")
+  status            String    @default("confirmed") @map("BOK_STATUS") // 'confirmed', 'cancelled', 'no_show', 'attended'
+  bookedAt          DateTime  @default(now()) @map("BOK_BOOKED_AT") // When booking was made
+  attendedAt        DateTime? @map("BOK_ATTENDED_AT") // When member checked in
+  cancelledAt       DateTime? @map("BOK_CANCELLED_AT") // When booking was cancelled
+  notes             String?   @map("BOK_NOTES") // Special requests or notes
+  createdAt         DateTime  @default(now()) @map("BOK_CREATED_AT")
+  updatedAt         DateTime  @updatedAt @map("BOK_UPDATED_AT")
 
   // Relations
   tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -146,26 +283,32 @@ model Booking {
   sessionInstance SessionInstance @relation(fields: [sessionInstanceId], references: [id], onDelete: Cascade)
 
   // Indexes
+  @@unique([memberId, sessionInstanceId]) // Prevent double-booking
   @@index([tenantId])
   @@index([memberId])
   @@index([sessionInstanceId])
   @@index([status])
   @@index([bookedAt])
-  @@unique([memberId, sessionInstanceId]) // Prevent double-booking
+  @@map("MOV_BOOKING")
 }
 
+// ============================================================================
+// PulseLoop Domain - Movement Events, Streaks, Challenges
+// Domain: PLP_ (PulseLoop)
+// ============================================================================
+
 model MovementEvent {
-  id               String   @id @default(uuid()) @db.Uuid
-  tenantId         String   @db.Uuid
-  memberId         String   @db.Uuid
-  sessionInstanceId String? @db.Uuid
-  type             String   // Event type classification
-  metadata         Json?    // Flexible event data
-  createdAt        DateTime @default(now())
+  id                String   @id @default(cuid()) @map("MVE_ID")
+  tenantId          String   @map("MVE_TENANT_ID")
+  memberId          String   @map("MVE_MEMBER_ID")
+  sessionInstanceId String?  @map("MVE_SESSION_INSTANCE_ID")
+  type              String   @map("MVE_TYPE") // Event type classification
+  metadata          Json?    @map("MVE_METADATA") // Flexible event data
+  createdAt         DateTime @default(now()) @map("MVE_CREATED_AT")
 
   // Relations
-  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  member          Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member          Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
   sessionInstance SessionInstance? @relation(fields: [sessionInstanceId], references: [id])
 
   // Indexes
@@ -174,4 +317,80 @@ model MovementEvent {
   @@index([createdAt])
   @@index([type])
   @@index([sessionInstanceId])
+  @@map("PLP_MOVEMENT_EVENT")
+}
+
+// ============================================================================
+// MoveOS Extended Features - Waitlist & Favorites
+// Domain: MOV_ (MoveOS)
+// ============================================================================
+
+// Waitlist for full sessions
+model Waitlist {
+  id                String   @id @default(cuid()) @map("WAI_ID")
+  tenantId          String   @map("WAI_TENANT_ID")
+  memberId          String   @map("WAI_MEMBER_ID")
+  sessionInstanceId String   @map("WAI_SESSION_INSTANCE_ID")
+  position          Int      @map("WAI_POSITION") // Position in waitlist (auto-calculated)
+  createdAt         DateTime @default(now()) @map("WAI_CREATED_AT")
+  updatedAt         DateTime @updatedAt @map("WAI_UPDATED_AT")
+
+  // Relations
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member          Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  sessionInstance SessionInstance @relation(fields: [sessionInstanceId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@unique([memberId, sessionInstanceId]) // Member can only be on waitlist once per session
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([sessionInstanceId])
+  @@map("MOV_WAITLIST")
+}
+
+// Member favorites for session types
+model Favorite {
+  id            String   @id @default(cuid()) @map("FAV_ID")
+  tenantId      String   @map("FAV_TENANT_ID")
+  memberId      String   @map("FAV_MEMBER_ID")
+  sessionTypeId String   @map("FAV_SESSION_TYPE_ID")
+  createdAt     DateTime @default(now()) @map("FAV_CREATED_AT")
+
+  // Relations
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member      Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  sessionType SessionType @relation(fields: [sessionTypeId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@unique([memberId, sessionTypeId]) // Member can only favorite a session type once
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([sessionTypeId])
+  @@map("MOV_FAVORITE")
+}
+
+// Gym Invitations
+model Invitation {
+  id             String           @id @default(cuid()) @map("INV_ID")
+  tenantId       String           @map("INV_TENANT_ID")
+  invitedById    String           @map("INV_SENDER_ID")
+  inviteeEmail   String           @map("INV_EMAIL")
+  inviteeName    String?          @map("INV_NAME")
+  role           MemberRole       @default(MEMBER) @map("INV_ROLE")
+  status         String           @default("PENDING") @map("INV_STATUS") // PENDING, ACCEPTED, DECLINED, EXPIRED, CANCELLED
+  message        String?          @map("INV_MESSAGE")
+  invitationCode String           @unique @map("INV_CODE")
+  expiresAt      DateTime         @map("INV_EXPIRES_AT")
+  acceptedAt     DateTime?        @map("INV_ACCEPTED_AT")
+  createdAt      DateTime         @default(now()) @map("INV_CREATED_AT")
+  updatedAt      DateTime         @updatedAt @map("INV_UPDATED_AT")
+
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invitedBy Member @relation("SentInvitations", fields: [invitedById], references: [id])
+
+  @@index([tenantId])
+  @@index([invitedById])
+  @@index([invitationCode])
+  @@index([inviteeEmail])
+  @@map("MOV_INVITATION")
 }

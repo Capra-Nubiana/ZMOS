@@ -18,8 +18,9 @@ export class CreateSessionInstanceDto {
   @IsDateString()
   startTime: string;
 
+  @IsOptional()
   @IsDateString()
-  endTime: string;
+  endTime?: string;
 
   @IsOptional()
   @IsInt()
