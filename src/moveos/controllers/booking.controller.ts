@@ -5,12 +5,16 @@ import {
   Body,
   Delete,
   Param,
+  Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { BookingService } from '../services/booking.service';
+import { MemberService } from '../services/member.service';
+import { FavoriteService } from '../services/favorite.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-// We'll need to add a decorator to get the member ID from JWT token
+import { CurrentMember } from '../../auth/current-member.decorator';
 
 @Controller('bookings')
 @UseGuards(JwtAuthGuard)
@@ -18,11 +22,11 @@ export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
   @Post()
-  create(@Body() createBookingDto: CreateBookingDto) {
-    // TODO: Extract memberId from JWT token
-    // For now, using placeholder - this needs to be implemented
-    const memberId = 'placeholder-member-id';
-    return this.bookingService.create(createBookingDto, memberId);
+  create(
+    @Body() createBookingDto: CreateBookingDto,
+    @CurrentMember() member: any,
+  ) {
+    return this.bookingService.create(createBookingDto, member.id);
   }
 
   @Get()
@@ -32,10 +36,8 @@ export class BookingController {
   }
 
   @Get('my')
-  getMyBookings() {
-    // TODO: Extract memberId from JWT token
-    const memberId = 'placeholder-member-id';
-    return this.bookingService.getMemberBookings(memberId);
+  getMyBookings(@CurrentMember() member: any) {
+    return this.bookingService.getMemberBookings(member.id);
   }
 
   @Get(':id')
@@ -49,35 +51,10 @@ export class BookingController {
     // TODO: Extract memberId from JWT token for authorization
     return this.bookingService.cancel(id);
   }
-}
 
-// Additional controller for member-specific operations
-@Controller('my')
-@UseGuards(JwtAuthGuard)
-export class MemberController {
-  constructor(
-    private readonly bookingService: BookingService,
-    private readonly streakService: any, // TODO: import StreakService
-  ) {}
-
-  @Get('bookings')
-  getMyBookings() {
-    // TODO: Extract memberId from JWT token
-    const memberId = 'placeholder-member-id';
-    return this.bookingService.getMemberBookings(memberId);
-  }
-
-  @Get('streak')
-  getStreak() {
-    // TODO: Extract memberId from JWT token
-    const memberId = 'placeholder-member-id';
-    return this.streakService.getStreakInfo(memberId);
-  }
-
-  @Get('attendance')
-  getAttendance() {
-    // TODO: Extract memberId from JWT token
-    const memberId = 'placeholder-member-id';
-    return this.streakService.getAttendanceEvents(memberId);
+  @Put(':id/no-show')
+  markNoShow(@Param('id') id: string) {
+    // Admin only endpoint
+    return this.bookingService.markNoShow(id);
   }
 }
