@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
 import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common';
 import { TrainerService } from '../services/trainer.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';

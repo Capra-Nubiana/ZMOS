@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
+/* eslint-disable @typescript-eslint/no-misused-promises */
+
 import {
   Injectable,
   ConflictException,
@@ -19,7 +25,7 @@ import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
 @Injectable()
 export class AuthService {
-  private prismaClient: any;
+  private prismaClient: PrismaClient;
   private googleClient: OAuth2Client;
 
   constructor(

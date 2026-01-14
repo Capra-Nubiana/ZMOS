@@ -1,12 +1,42 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { ConfigService } from '@nestjs/config';
+
+interface SessionType {
+  name: string;
+}
+
+interface AvailableSession {
+  capacity: number;
+  bookings?: unknown[];
+  sessionType: SessionType;
+  [key: string]: unknown;
+}
+
+interface AIRecommendation {
+  sessionNumber: number;
+  reason: string;
+  confidence: number;
+}
+
+interface AIResponse {
+  recommendations: AIRecommendation[];
+  overallConfidence?: number;
+  reasoning?: string;
+}
+
+interface RecommendationResult {
+  spotsAvailable: number;
+  recommendationReason: string;
+  aiConfidence: number;
+  [key: string]: unknown;
+}
 
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private genAI: GoogleGenerativeAI | undefined;
+  private model: GenerativeModel | undefined;
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('GOOGLE_AI_API_KEY');
@@ -19,7 +49,9 @@ export class AiService {
         });
         this.logger.log('Google Gemini AI initialized successfully');
       } catch (error) {
-        this.logger.warn('Failed to initialize Gemini AI:', error.message);
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        this.logger.warn('Failed to initialize Gemini AI:', errorMessage);
       }
     } else {
       this.logger.warn('GOOGLE_AI_API_KEY not found in environment variables');
@@ -30,11 +62,11 @@ export class AiService {
    * Generate session recommendations using AI
    */
   async generateSessionRecommendations(
-    memberProfile: any,
-    memberStats: any,
-    availableSessions: any[],
+    memberProfile: unknown,
+    memberStats: unknown,
+    availableSessions: AvailableSession[],
   ): Promise<{
-    recommendations: any[];
+    recommendations: RecommendationResult[];
     confidence: number;
     reasoning: string;
   }> {
@@ -46,7 +78,6 @@ export class AiService {
       const sessionList = availableSessions
         .slice(0, 20)
         .map((session, index) => {
-          const spots = session.capacity - (session.bookings?.length || 0);
           return `${index + 1}. ${session.sessionType.name}`;
         })
         .join(', ');
@@ -54,17 +85,17 @@ export class AiService {
       const prompt = `Recommend 5 fitness sessions for a member. Available: ${sessionList}. Return JSON with recommendations array containing sessionNumber, reason, confidence fields, plus overallConfidence and reasoning.`;
 
       const result = await this.model.generateContent(prompt);
-      const response = await result.response;
+      const response = result.response;
       const text = response.text();
 
       const jsonText = text
         .trim()
         .replace(/```json/g, '')
         .replace(/```/g, '');
-      const parsed = JSON.parse(jsonText);
+      const parsed = JSON.parse(jsonText) as AIResponse;
 
       const recommendations = parsed.recommendations
-        .map((rec: any) => {
+        .map((rec: AIRecommendation) => {
           const session = availableSessions[rec.sessionNumber - 1];
           if (!session) return null;
           return {
@@ -74,18 +105,17 @@ export class AiService {
             aiConfidence: rec.confidence,
           };
         })
-        .filter(Boolean);
+        .filter((item): item is RecommendationResult => item !== null);
 
       return {
         recommendations,
-        confidence: parsed.overallConfidence || 0.8,
-        reasoning: parsed.reasoning || 'AI-generated',
+        confidence: parsed.overallConfidence ?? 0.8,
+        reasoning: parsed.reasoning ?? 'AI-generated',
       };
     } catch (error) {
-      this.logger.error(
-        'Failed to generate AI recommendations:',
-        error.message,
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Failed to generate AI recommendations:', errorMessage);
       throw error;
     }
   }
