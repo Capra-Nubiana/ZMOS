@@ -34,8 +34,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install only production dependencies
-RUN npm ci --only=production
+# Install only production dependencies (skip prepare scripts like husky)
+RUN npm ci --only=production --ignore-scripts
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
