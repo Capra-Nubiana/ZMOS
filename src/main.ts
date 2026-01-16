@@ -9,6 +9,6 @@ async function bootstrap() {
   // Apply global exception filter for better auth error messages
   app.useGlobalFilters(new AuthExceptionFilter());
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 void bootstrap();
