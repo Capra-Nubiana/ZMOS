@@ -23,8 +23,11 @@ export class RecommendationService {
    * Get session recommendations for a member with AI enhancement
    * Tries AI first, falls back to rule-based if AI is unavailable
    */
-  async getRecommendationsWithAI(memberId: string, limit = 5): Promise<{
-    recommendations: any[];
+  async getRecommendationsWithAI(
+    memberId: string,
+    limit = 5,
+  ): Promise<{
+    recommendations: RecommendationResult[];
     totalAvailable: number;
     source: string;
     confidence?: number;

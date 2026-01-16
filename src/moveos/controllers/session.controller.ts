@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { SessionInstanceService } from '../services/session-instance.service';
 import { RecommendationService } from '../services/recommendation.service';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { RecommendationResult } from '../../ai/ai.service';
 import { WaitlistService } from '../services/waitlist.service';
 import { WeatherService } from '../services/weather.service';
