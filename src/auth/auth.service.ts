@@ -18,23 +18,15 @@ import { MemberSignupDto } from './dto/member-signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
-import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
 @Injectable()
 export class AuthService {
-  private prismaClient: PrismaClient;
   private googleClient: OAuth2Client;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {
-    // Prisma 7.x requires an adapter for SQLite
-    const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
-    const dbPath = dbUrl.replace('file:', '');
-    const adapter = new PrismaBetterSqlite3({ url: dbPath });
-    this.prismaClient = new PrismaClient({ adapter });
 
     // Initialize Google OAuth client
     // In production, this should come from environment variables
@@ -48,12 +40,12 @@ export class AuthService {
    */
   private async generateGymCode(): Promise<string> {
     // Get the count of existing tenants
-    const tenantCount = await this.prismaClient.tenant.count();
+    const tenantCount = await this.prisma.tenant.count();
     const nextNumber = tenantCount + 1;
     const code = `GYM${nextNumber.toString().padStart(4, '0')}`;
 
     // Check if code already exists (unlikely but safe)
-    const existing = await this.prismaClient.tenant.findUnique({
+    const existing = await this.prisma.tenant.findUnique({
       where: { code },
     });
 
@@ -78,7 +70,7 @@ export class AuthService {
 
     try {
       // Check if tenant with this name already exists
-      const existingTenant = await this.prismaClient.tenant.findFirst({
+      const existingTenant = await this.prisma.tenant.findFirst({
         where: { name: tenantName },
       });
 
@@ -89,7 +81,7 @@ export class AuthService {
       }
 
       // Check if member with this email already exists
-      const existingMember = await this.prismaClient.member.findFirst({
+      const existingMember = await this.prisma.member.findFirst({
         where: { email },
       });
 
@@ -108,7 +100,7 @@ export class AuthService {
       console.log('✓ Generated gym code:', gymCode);
 
       // Create tenant and member in a transaction
-      const result = await this.prismaClient.$transaction(async (tx: any) => {
+      const result = await this.prisma.$transaction(async (tx: any) => {
         // 1. Create tenant with unique code
         const tenant = await tx.tenant.create({
           data: {
@@ -144,7 +136,7 @@ export class AuthService {
 
       // Generate and save refresh token
       const refreshToken = crypto.randomBytes(32).toString('hex');
-      await this.prismaClient.member.update({
+      await this.prisma.member.update({
         where: { id: result.member.id },
         data: { refreshToken },
       });
@@ -190,7 +182,7 @@ export class AuthService {
 
     try {
       // Verify tenant exists
-      const tenant = await this.prismaClient.tenant.findUnique({
+      const tenant = await this.prisma.tenant.findUnique({
         where: { id: tenantId },
       });
 
@@ -199,7 +191,7 @@ export class AuthService {
       }
 
       // Check if member with this email already exists in this tenant
-      const existingMember = await this.prismaClient.member.findFirst({
+      const existingMember = await this.prisma.member.findFirst({
         where: {
           email,
           tenantId,
@@ -217,7 +209,7 @@ export class AuthService {
       console.log('✓ Password hashed successfully');
 
       // Create member (regular member role)
-      const member = await this.prismaClient.member.create({
+      const member = await this.prisma.member.create({
         data: {
           email,
           passwordHash,
@@ -239,7 +231,7 @@ export class AuthService {
 
       // Generate and save refresh token
       const refreshToken = crypto.randomBytes(32).toString('hex');
-      await this.prismaClient.member.update({
+      await this.prisma.member.update({
         where: { id: member.id },
         data: { refreshToken },
       });
@@ -292,7 +284,7 @@ export class AuthService {
       console.log('✓ Google token verified for:', email);
 
       // Check if user with this Google ID or email already exists
-      const existingMember = await this.prismaClient.member.findFirst({
+      const existingMember = await this.prisma.member.findFirst({
         where: {
           OR: [{ googleId }, { email }],
         },
@@ -307,7 +299,7 @@ export class AuthService {
 
         // Update googleId if not set (for users who signed up with email/password first)
         if (!existingMember.googleId) {
-          await this.prismaClient.member.update({
+          await this.prisma.member.update({
             where: { id: existingMember.id },
             data: { googleId, avatarUrl: picture },
           });
@@ -325,7 +317,7 @@ export class AuthService {
 
         // Generate and save refresh token
         const refreshToken = crypto.randomBytes(32).toString('hex');
-        await this.prismaClient.member.update({
+        await this.prisma.member.update({
           where: { id: existingMember.id },
           data: { refreshToken },
         });
@@ -364,7 +356,7 @@ export class AuthService {
         // Join existing tenant
         console.log('📍 Joining existing tenant:', tenantId);
 
-        tenant = await this.prismaClient.tenant.findUnique({
+        tenant = await this.prisma.tenant.findUnique({
           where: { id: tenantId },
         });
 
@@ -373,7 +365,7 @@ export class AuthService {
         }
 
         // Check if email already exists in this tenant
-        const memberInTenant = await this.prismaClient.member.findFirst({
+        const memberInTenant = await this.prisma.member.findFirst({
           where: {
             email,
             tenantId,
@@ -387,7 +379,7 @@ export class AuthService {
         }
 
         // Create member in existing tenant (regular member role)
-        member = await this.prismaClient.member.create({
+        member = await this.prisma.member.create({
           data: {
             email: email!,
             name: name || email?.split('@')[0] || 'User',
@@ -405,7 +397,7 @@ export class AuthService {
         console.log('📍 Creating new tenant:', tenantName);
 
         // Check if tenant with this name already exists
-        const existingTenant = await this.prismaClient.tenant.findFirst({
+        const existingTenant = await this.prisma.tenant.findFirst({
           where: { name: tenantName },
         });
 
@@ -416,7 +408,7 @@ export class AuthService {
         }
 
         // Create tenant and member in transaction
-        const result = await this.prismaClient.$transaction(async (tx: any) => {
+        const result = await this.prisma.$transaction(async (tx: any) => {
           const newTenant = await tx.tenant.create({
             data: { name: tenantName },
           });
@@ -458,7 +450,7 @@ export class AuthService {
 
       // Generate and save refresh token
       const refreshToken = crypto.randomBytes(32).toString('hex');
-      await this.prismaClient.member.update({
+      await this.prisma.member.update({
         where: { id: member.id },
         data: { refreshToken },
       });
@@ -491,9 +483,9 @@ export class AuthService {
   async login(dto: LoginDto) {
     const { email, password } = dto;
 
-    // Login doesn't have tenant context yet, so use direct prismaClient
+    // Login doesn't have tenant context yet, so use direct prisma
     // (not the tenant-filtered extended client)
-    const member = await this.prismaClient.member.findFirst({
+    const member = await this.prisma.member.findFirst({
       where: { email },
     });
 
@@ -514,7 +506,7 @@ export class AuthService {
     }
 
     // Fetch tenant info
-    const tenant = await this.prismaClient.tenant.findUnique({
+    const tenant = await this.prisma.tenant.findUnique({
       where: { id: member.tenantId },
     });
 
@@ -533,7 +525,7 @@ export class AuthService {
 
     // Generate and save refresh token
     const refreshToken = crypto.randomBytes(32).toString('hex');
-    await this.prismaClient.member.update({
+    await this.prisma.member.update({
       where: { id: member.id },
       data: { refreshToken },
     });
@@ -558,7 +550,7 @@ export class AuthService {
   async refresh(dto: RefreshTokenDto) {
     const { refreshToken } = dto;
 
-    const member = await this.prismaClient.member.findFirst({
+    const member = await this.prisma.member.findFirst({
       where: { refreshToken },
       include: { tenant: true },
     });
@@ -578,7 +570,7 @@ export class AuthService {
 
     // Optional: Rotate refresh token
     const newRefreshToken = crypto.randomBytes(32).toString('hex');
-    await this.prismaClient.member.update({
+    await this.prisma.member.update({
       where: { id: member.id },
       data: { refreshToken: newRefreshToken },
     });

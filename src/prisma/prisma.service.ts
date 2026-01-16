@@ -10,7 +10,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
@@ -22,23 +21,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   private cls: ClsService;
 
   constructor(cls: ClsService) {
-    // Set default DATABASE_URL if not provided
-    const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
+    // PostgreSQL only - no SQLite fallback in production
+    const dbUrl = process.env.DATABASE_URL;
 
-    // Choose adapter based on URL protocol
-    let adapter: any;
-    console.log(`[PrismaService] DATABASE_URL detected: ${dbUrl.substring(0, 10)}... (length: ${dbUrl.length})`);
-
-    if (dbUrl.startsWith('postgres://') || dbUrl.startsWith('postgresql://')) {
-      console.log('[PrismaService] Using PostgreSQL adapter');
-      const pool = new Pool({ connectionString: dbUrl });
-      adapter = new PrismaPg(pool);
-    } else {
-      console.log('[PrismaService] Falling back to SQLite adapter');
-      // Prisma 7.x requires an adapter for SQLite
-      const dbPath = dbUrl.replace('file:', '');
-      adapter = new PrismaBetterSqlite3({ url: dbPath });
+    if (!dbUrl) {
+      throw new Error('DATABASE_URL environment variable is required');
     }
+
+    console.log('[PrismaService] Using PostgreSQL adapter');
+    const pool = new Pool({ connectionString: dbUrl });
+    const adapter = new PrismaPg(pool);
 
     // Pass the adapter to PrismaClient constructor
     super({ adapter });

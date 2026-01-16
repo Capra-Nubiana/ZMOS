@@ -9,20 +9,14 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { ClsService } from 'nestjs-cls';
-import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
-  private prisma: any;
-
-  constructor(private readonly cls: ClsService) {
-    // Prisma 7.x requires an adapter for SQLite
-    const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
-    const dbPath = dbUrl.replace('file:', '');
-    const adapter = new PrismaBetterSqlite3({ url: dbPath });
-    this.prisma = new PrismaClient({ adapter });
-  }
+  constructor(
+    private readonly cls: ClsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     // This middleware validates tenant ID for all routes except auth endpoints
