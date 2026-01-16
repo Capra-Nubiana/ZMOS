@@ -33,7 +33,7 @@ export class SessionController {
     private readonly recommendationService: RecommendationService,
     private readonly waitlistService: WaitlistService,
     private readonly weatherService: WeatherService,
-  ) { }
+  ) {}
 
   // Protected endpoints (require authentication)
   @Post()

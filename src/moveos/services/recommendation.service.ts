@@ -17,7 +17,7 @@ export class RecommendationService {
     private prisma: PrismaService,
     private aiService: AiService,
     private memberService: MemberService,
-  ) { }
+  ) {}
 
   /**
    * Get session recommendations for a member with AI enhancement
@@ -207,7 +207,7 @@ export class RecommendationService {
       // Factor 3: Timing (sooner sessions get slightly higher score)
       const daysUntil = Math.ceil(
         (new Date(session.startTime).getTime() - now.getTime()) /
-        (1000 * 60 * 60 * 24),
+          (1000 * 60 * 60 * 24),
       );
       score += Math.max(0, 7 - daysUntil); // Max 7 points for sessions today
 
@@ -265,7 +265,7 @@ export class RecommendationService {
 
     const hoursUntil = Math.ceil(
       (new Date(session.startTime).getTime() - new Date().getTime()) /
-      (1000 * 60 * 60),
+        (1000 * 60 * 60),
     );
     if (hoursUntil <= 24) {
       reasons.push('Starting soon');

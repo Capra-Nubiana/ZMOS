@@ -21,4 +21,7 @@ async function bootstrap() {
     `[Bootstrap] Application successfully listening on ${host}:${port}`,
   );
 }
-void bootstrap();
+bootstrap().catch((err) => {
+  console.error('[Bootstrap] Fatal error:', err);
+  process.exit(1);
+});

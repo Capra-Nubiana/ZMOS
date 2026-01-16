@@ -2,8 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-/* eslint-disable @typescript-eslint/no-misused-promises */
-
 import {
   Injectable,
   ConflictException,
@@ -505,7 +503,9 @@ export class AuthService {
 
     // Verify password
     if (!member.passwordHash) {
-      throw new UnauthorizedException('Please use Google login for this account');
+      throw new UnauthorizedException(
+        'Please use Google login for this account',
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, member.passwordHash);
