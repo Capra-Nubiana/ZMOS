@@ -671,7 +671,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.$connect();
+    console.log('[PrismaService] Connecting to database...');
+    try {
+      await this.$connect();
+      console.log('[PrismaService] Connected successfully to database');
+    } catch (error) {
+      console.error(
+        '[PrismaService] FATAL: Failed to connect to database:',
+        error,
+      );
+      // We still let it proceed to allow NestJS to finish booting so we can see logs
+      // Cloud Run will eventually fail health checks if DB is down.
+    }
   }
 
   get extended(): any {
