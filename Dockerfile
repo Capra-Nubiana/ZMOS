@@ -10,8 +10,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci
+# Install dependencies (skip prepare scripts like husky)
+RUN npm ci --ignore-scripts
 
 # Copy source code
 COPY . .
