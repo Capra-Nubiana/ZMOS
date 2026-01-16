@@ -130,7 +130,12 @@ export class AuthService {
       try {
         result = await this.prisma.$transaction(async (tx: any) => {
           // 1. Create tenant with unique code
-          console.log('📝 Creating tenant with name:', tenantName, 'code:', gymCode);
+          console.log(
+            '📝 Creating tenant with name:',
+            tenantName,
+            'code:',
+            gymCode,
+          );
           const tenant = await tx.tenant.create({
             data: {
               name: tenantName,
@@ -150,7 +155,9 @@ export class AuthService {
               role: (dto.role as any) || 'OWNER', // Body role or OWNER default for creator
             },
           });
-          console.log(`✓ Member created: ${member.id} with role: ${member.role}`);
+          console.log(
+            `✓ Member created: ${member.id} with role: ${member.role}`,
+          );
 
           return { tenant, member };
         });
@@ -189,7 +196,9 @@ export class AuthService {
         console.log('✓ Refresh token saved');
       } catch (refreshError) {
         console.error('❌ Failed to save refresh token:', refreshError);
-        throw new Error('Failed to save refresh token: ' + refreshError.message);
+        throw new Error(
+          'Failed to save refresh token: ' + refreshError.message,
+        );
       }
 
       console.log('✓ JWT token generated with role:', result.member.role);

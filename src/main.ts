@@ -1,15 +1,15 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { AuthExceptionFilter } from './auth/auth-exception.filter';
+import { AllExceptionsFilter } from './common/all-exceptions.filter';
 
 async function bootstrap() {
   console.log('[Bootstrap] Starting up...');
   const app = await NestFactory.create(AppModule);
   console.log('[Bootstrap] App created');
 
-  // Apply global exception filter for better auth error messages
-  app.useGlobalFilters(new AuthExceptionFilter());
+  // Apply global exception filter for detailed error logging
+  app.useGlobalFilters(new AllExceptionsFilter());
   console.log('[Bootstrap] Global filters applied');
 
   const port = process.env.PORT ?? 3000;
