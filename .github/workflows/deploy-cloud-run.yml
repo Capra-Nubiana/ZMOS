@@ -81,3 +81,4 @@ jobs:
           echo "**Region:** ${{ env.REGION }}" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/zmos/${{ env.SERVICE_NAME }}:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** ${{ steps.get-url.outputs.SERVICE_URL }}" >> $GITHUB_STEP_SUMMARY
+# Trigger redeploy
