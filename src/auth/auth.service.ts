@@ -27,7 +27,6 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {
-
     // Initialize Google OAuth client
     // In production, this should come from environment variables
     this.googleClient = new OAuth2Client(
@@ -69,10 +68,22 @@ export class AuthService {
     console.log('📦 Raw signup DTO:', JSON.stringify(dto));
 
     try {
+      // Check database connection
+      console.log('🔍 Testing database connection...');
+      try {
+        await this.prisma.$queryRaw`SELECT 1`;
+        console.log('✓ Database connection successful');
+      } catch (dbError) {
+        console.error('❌ Database connection failed:', dbError);
+        throw new Error('Database connection failed: ' + dbError.message);
+      }
+
       // Check if tenant with this name already exists
+      console.log('🔍 Checking for existing tenant:', tenantName);
       const existingTenant = await this.prisma.tenant.findFirst({
         where: { name: tenantName },
       });
+      console.log('✓ Tenant check complete. Existing:', !!existingTenant);
 
       if (existingTenant) {
         throw new ConflictException(
@@ -92,54 +103,94 @@ export class AuthService {
       }
 
       // Hash password with bcrypt (12 rounds)
-      const passwordHash = await bcrypt.hash(password, 12);
-      console.log('✓ Password hashed successfully');
+      console.log('🔐 Hashing password...');
+      let passwordHash: string;
+      try {
+        passwordHash = await bcrypt.hash(password, 12);
+        console.log('✓ Password hashed successfully');
+      } catch (hashError) {
+        console.error('❌ Password hashing failed:', hashError);
+        throw new Error('Password hashing failed: ' + hashError.message);
+      }
 
       // Generate gym code
-      const gymCode = await this.generateGymCode();
-      console.log('✓ Generated gym code:', gymCode);
+      console.log('🏋️ Generating gym code...');
+      let gymCode: string;
+      try {
+        gymCode = await this.generateGymCode();
+        console.log('✓ Generated gym code:', gymCode);
+      } catch (codeError) {
+        console.error('❌ Gym code generation failed:', codeError);
+        throw new Error('Gym code generation failed: ' + codeError.message);
+      }
 
       // Create tenant and member in a transaction
-      const result = await this.prisma.$transaction(async (tx: any) => {
-        // 1. Create tenant with unique code
-        const tenant = await tx.tenant.create({
-          data: {
-            name: tenantName,
-            code: gymCode,
-          },
-        });
-        console.log('✓ Tenant created:', tenant.id, 'Code:', tenant.code);
+      console.log('🔄 Starting database transaction...');
+      let result: any;
+      try {
+        result = await this.prisma.$transaction(async (tx: any) => {
+          // 1. Create tenant with unique code
+          console.log('📝 Creating tenant with name:', tenantName, 'code:', gymCode);
+          const tenant = await tx.tenant.create({
+            data: {
+              name: tenantName,
+              code: gymCode,
+            },
+          });
+          console.log('✓ Tenant created:', tenant.id, 'Code:', tenant.code);
 
-        // 2. Create member
-        const member = await tx.member.create({
-          data: {
-            email,
-            passwordHash,
-            name,
-            tenantId: tenant.id,
-            role: (dto.role as any) || 'OWNER', // Body role or OWNER default for creator
-          },
-        });
-        console.log(`✓ Member created: ${member.id} with role: ${member.role}`);
+          // 2. Create member
+          console.log('📝 Creating member with email:', email);
+          const member = await tx.member.create({
+            data: {
+              email,
+              passwordHash,
+              name,
+              tenantId: tenant.id,
+              role: (dto.role as any) || 'OWNER', // Body role or OWNER default for creator
+            },
+          });
+          console.log(`✓ Member created: ${member.id} with role: ${member.role}`);
 
-        return { tenant, member };
-      });
+          return { tenant, member };
+        });
+        console.log('✓ Transaction completed successfully');
+      } catch (txError) {
+        console.error('❌ Transaction failed:', txError);
+        console.error('Error details:', JSON.stringify(txError, null, 2));
+        throw new Error('Database transaction failed: ' + txError.message);
+      }
 
       // Generate JWT token with member ID, tenant ID, and role
+      console.log('🔑 Generating JWT token...');
       const payload = {
         sub: result.member.id,
         email: result.member.email,
         tenantId: result.tenant.id,
         role: result.member.role,
       };
-      const token = this.jwtService.sign(payload);
+      let token: string;
+      try {
+        token = this.jwtService.sign(payload);
+        console.log('✓ JWT token generated');
+      } catch (jwtError) {
+        console.error('❌ JWT token generation failed:', jwtError);
+        throw new Error('JWT token generation failed: ' + jwtError.message);
+      }
 
       // Generate and save refresh token
+      console.log('🔄 Generating refresh token...');
       const refreshToken = crypto.randomBytes(32).toString('hex');
-      await this.prisma.member.update({
-        where: { id: result.member.id },
-        data: { refreshToken },
-      });
+      try {
+        await this.prisma.member.update({
+          where: { id: result.member.id },
+          data: { refreshToken },
+        });
+        console.log('✓ Refresh token saved');
+      } catch (refreshError) {
+        console.error('❌ Failed to save refresh token:', refreshError);
+        throw new Error('Failed to save refresh token: ' + refreshError.message);
+      }
 
       console.log('✓ JWT token generated with role:', result.member.role);
       console.log(
@@ -166,6 +217,11 @@ export class AuthService {
       };
     } catch (error) {
       console.error('❌ Signup error:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      if (error.code) console.error('Error code:', error.code);
+      if (error.meta) console.error('Error meta:', JSON.stringify(error.meta));
       throw error;
     }
   }
