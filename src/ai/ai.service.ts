@@ -6,11 +6,13 @@ interface SessionType {
   name: string;
 }
 
-interface AvailableSession {
+export interface AvailableSession {
+  id: string;
   capacity: number;
-  bookings?: unknown[];
+  bookings?: any[];
   sessionType: SessionType;
-  [key: string]: unknown;
+  startTime: Date;
+  [key: string]: any;
 }
 
 interface AIRecommendation {
@@ -25,11 +27,10 @@ interface AIResponse {
   reasoning?: string;
 }
 
-interface RecommendationResult {
+export interface RecommendationResult extends AvailableSession {
   spotsAvailable: number;
   recommendationReason: string;
   aiConfidence: number;
-  [key: string]: unknown;
 }
 
 @Injectable()

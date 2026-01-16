@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { SessionInstanceService } from '../services/session-instance.service';
 import { RecommendationService } from '../services/recommendation.service';
+import { RecommendationResult } from '../../ai/ai.service';
 import { WaitlistService } from '../services/waitlist.service';
 import { WeatherService } from '../services/weather.service';
 import { CreateSessionInstanceDto } from '../dto/create-session-instance.dto';
@@ -31,7 +32,7 @@ export class SessionController {
     private readonly recommendationService: RecommendationService,
     private readonly waitlistService: WaitlistService,
     private readonly weatherService: WeatherService,
-  ) {}
+  ) { }
 
   // Protected endpoints (require authentication)
   @Post()

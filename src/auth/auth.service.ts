@@ -391,7 +391,7 @@ export class AuthService {
         // Create member in existing tenant (regular member role)
         member = await this.prismaClient.member.create({
           data: {
-            email,
+            email: email!,
             name: name || email?.split('@')[0] || 'User',
             googleId,
             avatarUrl: picture,
@@ -504,6 +504,10 @@ export class AuthService {
     }
 
     // Verify password
+    if (!member.passwordHash) {
+      throw new UnauthorizedException('Please use Google login for this account');
+    }
+
     const isPasswordValid = await bcrypt.compare(password, member.passwordHash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -513,6 +517,10 @@ export class AuthService {
     const tenant = await this.prismaClient.tenant.findUnique({
       where: { id: member.tenantId },
     });
+
+    if (!tenant) {
+      throw new UnauthorizedException('Tenant not found');
+    }
 
     // Generate JWT with email included
     const payload = {

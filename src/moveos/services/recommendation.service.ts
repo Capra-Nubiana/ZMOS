@@ -6,7 +6,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { AiService } from '../../ai/ai.service';
+import { AiService, RecommendationResult } from '../../ai/ai.service';
 import { MemberService } from './member.service';
 
 @Injectable()
@@ -17,13 +17,19 @@ export class RecommendationService {
     private prisma: PrismaService,
     private aiService: AiService,
     private memberService: MemberService,
-  ) {}
+  ) { }
 
   /**
    * Get session recommendations for a member with AI enhancement
    * Tries AI first, falls back to rule-based if AI is unavailable
    */
-  async getRecommendationsWithAI(memberId: string, limit = 5) {
+  async getRecommendationsWithAI(memberId: string, limit = 5): Promise<{
+    recommendations: any[];
+    totalAvailable: number;
+    source: string;
+    confidence?: number;
+    reasoning?: string;
+  }> {
     try {
       if (this.aiService.isAvailable()) {
         // Get member profile and stats
@@ -198,7 +204,7 @@ export class RecommendationService {
       // Factor 3: Timing (sooner sessions get slightly higher score)
       const daysUntil = Math.ceil(
         (new Date(session.startTime).getTime() - now.getTime()) /
-          (1000 * 60 * 60 * 24),
+        (1000 * 60 * 60 * 24),
       );
       score += Math.max(0, 7 - daysUntil); // Max 7 points for sessions today
 
@@ -256,7 +262,7 @@ export class RecommendationService {
 
     const hoursUntil = Math.ceil(
       (new Date(session.startTime).getTime() - new Date().getTime()) /
-        (1000 * 60 * 60),
+      (1000 * 60 * 60),
     );
     if (hoursUntil <= 24) {
       reasons.push('Starting soon');
