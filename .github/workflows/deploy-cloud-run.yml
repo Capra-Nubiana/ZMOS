@@ -53,8 +53,8 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "NODE_ENV=production" \
-            --set-secrets "DATABASE_URL=DATABASE_URL:latest,JWT_SECRET=JWT_SECRET:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest" \
+            --set-env-vars "NODE_ENV=production,DATABASE_URL=postgresql://neondb_owner:npg_S3Q5eJgiyVDw@ep-little-waterfall-agdue8dj-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require" \
+            --set-secrets "JWT_SECRET=JWT_SECRET:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest" \
             --memory 1Gi \
             --cpu 2 \
             --min-instances 0 \
