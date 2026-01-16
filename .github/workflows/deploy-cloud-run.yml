@@ -47,15 +47,14 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/zmos/${{ env.SERVICE_NAME }}:latest
 
       - name: Deploy to Cloud Run
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/zmos/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "NODE_ENV=production,DATABASE_URL=${DATABASE_URL}" \
+            --update-env-vars NODE_ENV=production \
+            --update-env-vars DATABASE_URL="${{ secrets.DATABASE_URL }}" \
             --set-secrets "JWT_SECRET=JWT_SECRET:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest" \
             --memory 1Gi \
             --cpu 2 \
