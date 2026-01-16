@@ -60,6 +60,7 @@ jobs:
             --min-instances 0 \
             --max-instances 10 \
             --timeout 300 \
+            --max-instances-startup 1200 \
             --cpu-boost \
             --no-cpu-throttling \
             --concurrency 80
