@@ -37,7 +37,7 @@ COPY prisma ./prisma/
 # Install only production dependencies (skip prepare scripts like husky)
 RUN npm ci --only=production --ignore-scripts
 
-# Copy built application from builder
+# Copy built application from builder BEFORE changing user
 COPY --from=builder /app/dist ./dist
 
 # Generate Prisma Client in production image
@@ -47,8 +47,11 @@ RUN npx prisma generate
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
-# Change ownership of app directory
+# Change ownership of app directory (AFTER copying everything)
 RUN chown -R nestjs:nodejs /app
+
+# Debug: List dist contents
+RUN ls -la /app/dist
 
 # Switch to non-root user
 USER nestjs
