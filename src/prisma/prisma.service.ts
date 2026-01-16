@@ -27,10 +27,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
     // Choose adapter based on URL protocol
     let adapter: any;
+    console.log(`[PrismaService] DATABASE_URL detected: ${dbUrl.substring(0, 10)}... (length: ${dbUrl.length})`);
+
     if (dbUrl.startsWith('postgres://') || dbUrl.startsWith('postgresql://')) {
+      console.log('[PrismaService] Using PostgreSQL adapter');
       const pool = new Pool({ connectionString: dbUrl });
       adapter = new PrismaPg(pool);
     } else {
+      console.log('[PrismaService] Falling back to SQLite adapter');
       // Prisma 7.x requires an adapter for SQLite
       const dbPath = dbUrl.replace('file:', '');
       adapter = new PrismaBetterSqlite3({ url: dbPath });
@@ -47,28 +51,26 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     const self = this;
     this._extended = (this as any).$extends({
       query: {
-        // Existing Member entity extensions
+        // Shared extensions for multiple entities
         member: {
           async findUnique({ args, query }) {
             return query({
               ...args,
               where: {
                 ...args.where,
-                tenantId: self.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId') || args.where?.tenantId,
               },
             });
           },
-
           async findFirst({ args, query }) {
             return query({
               ...args,
               where: {
                 ...args.where,
-                tenantId: self.cls.get('tenantId'),
+                tenantId: self.cls.get('tenantId') || args.where?.tenantId,
               },
             });
           },
-
           async findMany({ args, query }) {
             return query({
               ...args,
@@ -78,7 +80,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               },
             });
           },
-
           async create({ args, query }) {
             return query({
               ...args,
@@ -88,7 +89,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               },
             });
           },
-
           async update({ args, query }) {
             return query({
               ...args,
@@ -98,7 +98,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               },
             });
           },
-
           async updateMany({ args, query }) {
             return query({
               ...args,
@@ -108,7 +107,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               },
             });
           },
-
           async upsert({ args, query }) {
             return query({
               ...args,
@@ -118,7 +116,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               },
             });
           },
-
           async delete({ args, query }) {
             return query({
               ...args,
@@ -128,7 +125,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
               },
             });
           },
-
           async deleteMany({ args, query }) {
             return query({
               ...args,
@@ -680,8 +676,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         '[PrismaService] FATAL: Failed to connect to database:',
         error,
       );
-      // We still let it proceed to allow NestJS to finish booting so we can see logs
-      // Cloud Run will eventually fail health checks if DB is down.
     }
   }
 
