@@ -40,6 +40,9 @@ RUN npm ci --only=production --ignore-scripts
 # Copy built application from builder BEFORE changing user
 COPY --from=builder /app/dist ./dist
 
+# Copy production environment file
+COPY .env.production ./.env
+
 # Generate Prisma Client in production image
 RUN npx prisma generate
 

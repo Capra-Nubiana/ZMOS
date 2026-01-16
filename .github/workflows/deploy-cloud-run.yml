@@ -48,17 +48,11 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
-          echo '${{ secrets.DATABASE_URL }}' > /tmp/db_url.txt
-          DB_URL=$(cat /tmp/db_url.txt)
-          rm /tmp/db_url.txt
-
           gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/zmos/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "NODE_ENV=production" \
-            --update-env-vars "DATABASE_URL=${DB_URL}" \
             --set-secrets "JWT_SECRET=JWT_SECRET:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest" \
             --memory 1Gi \
             --cpu 2 \
