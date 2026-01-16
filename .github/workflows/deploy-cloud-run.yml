@@ -47,13 +47,15 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/zmos/${{ env.SERVICE_NAME }}:latest
 
       - name: Deploy to Cloud Run
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/zmos/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "NODE_ENV=production,DATABASE_URL=postgresql://neondb_owner:npg_S3Q5eJgiyVDw@ep-little-waterfall-agdue8dj-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require" \
+            --set-env-vars "NODE_ENV=production,DATABASE_URL=${DATABASE_URL}" \
             --set-secrets "JWT_SECRET=JWT_SECRET:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest" \
             --memory 1Gi \
             --cpu 2 \
