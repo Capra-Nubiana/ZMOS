@@ -1,0 +1,63 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist
+build
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Development files
+*.md
+!README.md
+.git
+.gitignore
+
+# Test files
+coverage
+.nyc_output
+test
+**/*.spec.ts
+**/*.test.ts
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Temp files
+.temp
+.tmp
+*.pid
+*.seed
+*.pid.lock
+
+# Documentation
+docs
+design
+generated
+
+# Database files (dev only)
+*.db
+*.db-journal
+
+# Firebase admin keys
+*firebase*admin*.json
+
+# Reports and documentation
+*REPORT*.md
+*DOCUMENTATION*.md
+backend-logs.txt
+check-*.js
