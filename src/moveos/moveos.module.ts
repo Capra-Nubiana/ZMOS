@@ -17,6 +17,7 @@ import { WeatherService } from './services/weather.service';
 import { LocationHierarchyService } from './services/location-hierarchy.service';
 import { MemberProfileService } from './services/member-profile.service';
 import { TrainerService } from './services/trainer.service';
+import { PaymentService } from './services/payment.service';
 
 // Controllers
 import { LocationController } from './controllers/location.controller';
@@ -28,6 +29,7 @@ import { ReferenceDataController } from './controllers/reference.controller';
 import { MemberProfileController } from './controllers/member-profile.controller';
 import { TrainerController } from './controllers/trainer.controller';
 import { InvitationController } from './controllers/invitation.controller';
+import { PaymentController } from './controllers/payment.controller';
 import { InvitationService } from './services/invitation.service';
 
 import { AuthModule } from '../auth/auth.module';
@@ -44,6 +46,7 @@ import { AuthModule } from '../auth/auth.module';
     MemberProfileController,
     TrainerController,
     InvitationController,
+    PaymentController,
   ],
   providers: [
     LocationService,
@@ -61,6 +64,7 @@ import { AuthModule } from '../auth/auth.module';
     MemberProfileService,
     TrainerService,
     InvitationService,
+    PaymentService,
   ],
   exports: [
     LocationService,
