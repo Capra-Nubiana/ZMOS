@@ -18,6 +18,7 @@ import { LocationHierarchyService } from './services/location-hierarchy.service'
 import { MemberProfileService } from './services/member-profile.service';
 import { TrainerService } from './services/trainer.service';
 import { PaymentService } from './services/payment.service';
+import { MembershipService } from './services/membership.service';
 
 // Controllers
 import { LocationController } from './controllers/location.controller';
@@ -30,6 +31,7 @@ import { MemberProfileController } from './controllers/member-profile.controller
 import { TrainerController } from './controllers/trainer.controller';
 import { InvitationController } from './controllers/invitation.controller';
 import { PaymentController } from './controllers/payment.controller';
+import { MembershipController } from './controllers/membership.controller';
 import { InvitationService } from './services/invitation.service';
 
 import { AuthModule } from '../auth/auth.module';
@@ -47,6 +49,7 @@ import { AuthModule } from '../auth/auth.module';
     TrainerController,
     InvitationController,
     PaymentController,
+    MembershipController,
   ],
   providers: [
     LocationService,
@@ -65,6 +68,7 @@ import { AuthModule } from '../auth/auth.module';
     TrainerService,
     InvitationService,
     PaymentService,
+    MembershipService,
   ],
   exports: [
     LocationService,
@@ -82,4 +86,4 @@ import { AuthModule } from '../auth/auth.module';
     InvitationService,
   ],
 })
-export class MoveosModule {}
+export class MoveosModule { }

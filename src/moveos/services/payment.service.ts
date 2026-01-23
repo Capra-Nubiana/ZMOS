@@ -25,7 +25,7 @@ export class PaymentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   // ========================================================================
   // Payment Request Methods
@@ -484,6 +484,60 @@ export class PaymentService {
     );
 
     return earnings;
+  }
+
+  /**
+   * Get all trainer earnings for a tenant (for owners)
+   */
+  async getAllTrainerEarnings(tenantId: string, month: number, year: number) {
+    return this.prisma.extended.trainerEarnings.findMany({
+      where: {
+        tenantId,
+        month,
+        year,
+      },
+      include: {
+        trainer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            trainerCode: true,
+          },
+        },
+      },
+      orderBy: {
+        netEarnings: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Update payout status (mark as PAID)
+   */
+  async updatePayoutStatus(
+    payoutId: string,
+    status: string,
+    payoutReference?: string,
+    payoutMethod?: string,
+  ) {
+    const payout = await this.prisma.extended.trainerEarnings.findUnique({
+      where: { id: payoutId },
+    });
+
+    if (!payout) {
+      throw new NotFoundException('Payout record not found');
+    }
+
+    return this.prisma.extended.trainerEarnings.update({
+      where: { id: payoutId },
+      data: {
+        status,
+        payoutReference,
+        payoutMethod,
+        payoutDate: status === 'PAID' ? new Date() : undefined,
+      },
+    });
   }
 
   /**
