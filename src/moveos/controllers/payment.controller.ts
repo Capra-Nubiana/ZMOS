@@ -20,7 +20,7 @@ import { MpesaCallbackDto } from '../dto/mpesa-callback.dto';
 
 @Controller('payments')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private readonly paymentService: PaymentService) { }
 
   // ========================================================================
   // Payment Request Endpoints
@@ -134,5 +134,40 @@ export class PaymentController {
     const yearNum = year ? parseInt(year, 10) : undefined;
 
     return this.paymentService.getTrainerRevenue(member.id, monthNum, yearNum);
+  }
+
+  /**
+   * GET /payments/owner/trainer-earnings
+   * Get all trainer earnings for a tenant (Owner/Admin)
+   */
+  @Get('owner/trainer-earnings')
+  @UseGuards(JwtAuthGuard)
+  getAllTrainerEarnings(
+    @CurrentMember() member: any,
+    @Query('month') month: string,
+    @Query('year') year: string,
+  ) {
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
+    return this.paymentService.getAllTrainerEarnings(
+      member.tenantId,
+      monthNum,
+      yearNum,
+    );
+  }
+
+  /**
+   * PATCH /payments/owner/payouts/:id
+   * Update payout status (mark as PAID)
+   */
+  @Post('owner/payouts/:id/status') // Using Post for status update to avoid patch complexity for now
+  @UseGuards(JwtAuthGuard)
+  updatePayoutStatus(
+    @Param('id') id: string,
+    @Body('status') status: string,
+    @Body('reference') reference?: string,
+    @Body('method') method?: string,
+  ) {
+    return this.paymentService.updatePayoutStatus(id, status, reference, method);
   }
 }
