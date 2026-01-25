@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentService } from './payment.service';
+import { PaymentType } from '../dto/create-payment-request.dto';
 
 @Injectable()
 export class MembershipService {
@@ -81,7 +82,7 @@ export class MembershipService {
                 toMemberId: memberId,
                 amount: plan.price,
                 currency: plan.currency,
-                paymentType: 'gym_membership',
+                paymentType: PaymentType.GYM_MEMBERSHIP,
                 description: `Membership: ${plan.name} (${plan.billingCycle})`,
                 metadata: {
                     subscriptionId: subscription.id,
