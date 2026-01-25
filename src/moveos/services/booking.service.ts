@@ -16,7 +16,7 @@ import { CreateBookingDto } from '../dto/create-booking.dto';
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(createBookingDto: CreateBookingDto, memberId: string) {
     const { sessionInstanceId } = createBookingDto;
@@ -65,15 +65,17 @@ export class BookingService {
     }
 
     // Check capacity
-    const confirmedBookings = await this.prisma.extended.booking.count({
-      where: {
-        sessionInstanceId,
-        status: 'confirmed',
-      },
-    });
+    if (sessionInstance.capacity !== null) {
+      const confirmedBookings = await this.prisma.extended.booking.count({
+        where: {
+          sessionInstanceId,
+          status: 'confirmed',
+        },
+      });
 
-    if (confirmedBookings >= sessionInstance.capacity) {
-      throw new ConflictException('Session is full');
+      if (confirmedBookings >= sessionInstance.capacity) {
+        throw new ConflictException('Session is full');
+      }
     }
 
     // Create booking in a transaction with MovementEvent

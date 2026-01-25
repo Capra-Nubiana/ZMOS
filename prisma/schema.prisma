@@ -37,6 +37,13 @@ model Tenant {
   favorites        Favorite[]
   invitations      Invitation[]
 
+  // Payment relations
+  paymentRequests         PaymentRequest[]
+  mpesaTransactions       MpesaTransaction[]
+  membershipPlans         MembershipPlan[]
+  membershipSubscriptions MembershipSubscription[]
+  trainerEarnings         TrainerEarnings[]
+
   @@index([code])
   @@map("MOV_TENANT")
 }
@@ -83,6 +90,13 @@ model Member {
   waitlists      Waitlist[]
   favorites      Favorite[]
   sentInvitations Invitation[] @relation("SentInvitations")
+
+  // Payment relations
+  sentPaymentRequests     PaymentRequest[]         @relation("SentPaymentRequests")
+  receivedPaymentRequests PaymentRequest[]         @relation("ReceivedPaymentRequests")
+  mpesaTransactions       MpesaTransaction[]
+  membershipSubscriptions MembershipSubscription[]
+  trainerEarnings         TrainerEarnings[]
 
   @@unique([email, tenantId])
   @@index([tenantId])
@@ -393,4 +407,207 @@ model Invitation {
   @@index([invitationCode])
   @@index([inviteeEmail])
   @@map("MOV_INVITATION")
+}
+
+// ============================================================================
+// Payment System - Phase 3
+// Domain: PAY_ (Payment)
+// ============================================================================
+
+// Payment Request - Core payment tracking
+model PaymentRequest {
+  id          String   @id @default(cuid()) @map("PAY_ID")
+  tenantId    String   @map("PAY_TENANT_ID")
+  fromMemberId String? @map("PAY_FROM_MEMBER_ID") // Who is requesting payment (trainer/gym owner)
+  toMemberId  String   @map("PAY_TO_MEMBER_ID") // Who should pay (client/member)
+
+  amount      Float    @map("PAY_AMOUNT") // Amount in KES or other currency
+  currency    String   @default("KES") @map("PAY_CURRENCY") // Currency code (KES, USD, ZAR, etc.)
+
+  paymentType String   @map("PAY_TYPE") // 'trainer_session', 'gym_membership', 'personal_training', 'equipment_rental'
+  description String?  @map("PAY_DESCRIPTION") // Description of what payment is for
+
+  status      String   @default("PENDING") @map("PAY_STATUS") // 'PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'
+
+  dueDate     DateTime? @map("PAY_DUE_DATE") // When payment is due
+  paidAt      DateTime? @map("PAY_PAID_AT") // When payment was completed
+  cancelledAt DateTime? @map("PAY_CANCELLED_AT")
+
+  // Metadata
+  metadata    Json?    @map("PAY_METADATA") // Flexible data (session IDs, booking references, etc.)
+
+  createdAt   DateTime @default(now()) @map("PAY_CREATED_AT")
+  updatedAt   DateTime @updatedAt @map("PAY_UPDATED_AT")
+
+  // Relations
+  tenant        Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fromMember    Member?            @relation("SentPaymentRequests", fields: [fromMemberId], references: [id])
+  toMember      Member             @relation("ReceivedPaymentRequests", fields: [toMemberId], references: [id])
+  mpesaTransactions MpesaTransaction[]
+
+  // Indexes
+  @@index([tenantId])
+  @@index([fromMemberId])
+  @@index([toMemberId])
+  @@index([status])
+  @@index([paymentType])
+  @@index([dueDate])
+  @@index([createdAt])
+  @@map("PAY_PAYMENT_REQUEST")
+}
+
+// M-Pesa Transaction - Tracks M-Pesa STK Push transactions
+model MpesaTransaction {
+  id               String   @id @default(cuid()) @map("MPE_ID")
+  tenantId         String   @map("MPE_TENANT_ID")
+  paymentRequestId String   @map("MPE_PAYMENT_REQUEST_ID")
+  memberId         String   @map("MPE_MEMBER_ID") // Who is paying
+
+  // M-Pesa Daraja API fields
+  phoneNumber      String   @map("MPE_PHONE_NUMBER") // Kenyan phone number (254XXXXXXXXX)
+  amount           Float    @map("MPE_AMOUNT") // Amount sent to M-Pesa
+  accountReference String   @map("MPE_ACCOUNT_REF") // Account reference (payment request ID)
+  transactionDesc  String   @map("MPE_TRANSACTION_DESC") // Transaction description
+
+  // M-Pesa API response fields
+  merchantRequestId String? @map("MPE_MERCHANT_REQUEST_ID") // From STK Push initiation
+  checkoutRequestId String? @unique @map("MPE_CHECKOUT_REQUEST_ID") // From STK Push initiation
+  responseCode      String? @map("MPE_RESPONSE_CODE") // Response code from M-Pesa
+  responseDescription String? @map("MPE_RESPONSE_DESC") // Response description
+  customerMessage   String? @map("MPE_CUSTOMER_MESSAGE") // Message shown to customer
+
+  // M-Pesa callback fields
+  mpesaReceiptNumber String? @unique @map("MPE_RECEIPT_NUMBER") // M-Pesa transaction receipt (from callback)
+  transactionDate    DateTime? @map("MPE_TRANSACTION_DATE") // When payment was completed (from callback)
+  resultCode         String? @map("MPE_RESULT_CODE") // Result code from callback
+  resultDesc         String? @map("MPE_RESULT_DESC") // Result description from callback
+
+  status             String  @default("INITIATED") @map("MPE_STATUS") // 'INITIATED', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELLED', 'TIMEOUT'
+
+  // Webhook/callback data
+  callbackReceived   Boolean @default(false) @map("MPE_CALLBACK_RECEIVED")
+  callbackData       Json?   @map("MPE_CALLBACK_DATA") // Full callback payload for debugging
+
+  createdAt          DateTime @default(now()) @map("MPE_CREATED_AT")
+  updatedAt          DateTime @updatedAt @map("MPE_UPDATED_AT")
+
+  // Relations
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  paymentRequest PaymentRequest @relation(fields: [paymentRequestId], references: [id])
+  member         Member         @relation(fields: [memberId], references: [id])
+
+  // Indexes
+  @@index([tenantId])
+  @@index([paymentRequestId])
+  @@index([memberId])
+  @@index([status])
+  @@index([checkoutRequestId])
+  @@index([mpesaReceiptNumber])
+  @@map("PAY_MPESA_TRANSACTION")
+}
+
+// Membership Plan - Gym membership tiers/plans
+model MembershipPlan {
+  id          String   @id @default(cuid()) @map("MBP_ID")
+  tenantId    String   @map("MBP_TENANT_ID")
+
+  name        String   @map("MBP_NAME") // e.g., "Basic", "Premium", "Platinum"
+  description String?  @map("MBP_DESCRIPTION") // What's included
+
+  price       Float    @map("MBP_PRICE") // Monthly price
+  currency    String   @default("KES") @map("MBP_CURRENCY")
+
+  billingCycle String  @default("monthly") @map("MBP_BILLING_CYCLE") // 'monthly', 'quarterly', 'yearly'
+
+  features    Json?    @map("MBP_FEATURES") // JSON array of features/benefits
+
+  // Limits and access
+  sessionsPerMonth Int?   @map("MBP_SESSIONS_PER_MONTH") // -1 for unlimited
+  accessLevel      String @default("standard") @map("MBP_ACCESS_LEVEL") // 'basic', 'standard', 'premium', 'vip'
+
+  isActive    Boolean  @default(true) @map("MBP_IS_ACTIVE")
+  createdAt   DateTime @default(now()) @map("MBP_CREATED_AT")
+  updatedAt   DateTime @updatedAt @map("MBP_UPDATED_AT")
+
+  // Relations
+  tenant        Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscriptions MembershipSubscription[]
+
+  // Indexes
+  @@index([tenantId])
+  @@index([isActive])
+  @@map("PAY_MEMBERSHIP_PLAN")
+}
+
+// Membership Subscription - Member's subscription to a plan
+model MembershipSubscription {
+  id               String   @id @default(cuid()) @map("MBS_ID")
+  tenantId         String   @map("MBS_TENANT_ID")
+  memberId         String   @map("MBS_MEMBER_ID")
+  membershipPlanId String   @map("MBS_PLAN_ID")
+
+  status           String   @default("ACTIVE") @map("MBS_STATUS") // 'ACTIVE', 'SUSPENDED', 'CANCELLED', 'EXPIRED'
+
+  startDate        DateTime @map("MBS_START_DATE") // When subscription starts
+  endDate          DateTime @map("MBS_END_DATE") // When current billing period ends
+  nextBillingDate  DateTime @map("MBS_NEXT_BILLING") // When next payment is due
+
+  autoRenew        Boolean  @default(true) @map("MBS_AUTO_RENEW") // Auto-renew subscription
+
+  cancelledAt      DateTime? @map("MBS_CANCELLED_AT")
+  cancellationReason String? @map("MBS_CANCELLATION_REASON")
+
+  createdAt        DateTime @default(now()) @map("MBS_CREATED_AT")
+  updatedAt        DateTime @updatedAt @map("MBS_UPDATED_AT")
+
+  // Relations
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member        Member         @relation(fields: [memberId], references: [id])
+  membershipPlan MembershipPlan @relation(fields: [membershipPlanId], references: [id])
+
+  // Indexes
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([membershipPlanId])
+  @@index([status])
+  @@index([nextBillingDate])
+  @@map("PAY_MEMBERSHIP_SUBSCRIPTION")
+}
+
+// Trainer Earnings - Track trainer revenue and payouts
+model TrainerEarnings {
+  id          String   @id @default(cuid()) @map("TEA_ID")
+  tenantId    String   @map("TEA_TENANT_ID")
+  trainerId   String   @map("TEA_TRAINER_ID") // Member ID of trainer
+
+  month       Int      @map("TEA_MONTH") // 1-12
+  year        Int      @map("TEA_YEAR")
+
+  totalRevenue   Float @default(0) @map("TEA_TOTAL_REVENUE") // Total revenue earned
+  platformFee    Float @default(0) @map("TEA_PLATFORM_FEE") // Platform commission (e.g., 10%)
+  netEarnings    Float @default(0) @map("TEA_NET_EARNINGS") // After platform fee
+
+  payoutAmount   Float @default(0) @map("TEA_PAYOUT_AMOUNT") // Amount paid out
+  payoutDate     DateTime? @map("TEA_PAYOUT_DATE") // When payout was made
+  payoutMethod   String?   @map("TEA_PAYOUT_METHOD") // 'mpesa', 'bank_transfer', etc.
+  payoutReference String?  @map("TEA_PAYOUT_REFERENCE") // Transaction reference
+
+  status         String @default("PENDING") @map("TEA_STATUS") // 'PENDING', 'PAID', 'PROCESSING'
+
+  metadata       Json?  @map("TEA_METADATA") // Additional data (transaction IDs, etc.)
+
+  createdAt      DateTime @default(now()) @map("TEA_CREATED_AT")
+  updatedAt      DateTime @updatedAt @map("TEA_UPDATED_AT")
+
+  // Relations
+  tenant  Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  trainer Member @relation(fields: [trainerId], references: [id])
+
+  // Indexes
+  @@unique([trainerId, month, year]) // One record per trainer per month
+  @@index([tenantId])
+  @@index([trainerId])
+  @@index([status])
+  @@index([year, month])
+  @@map("PAY_TRAINER_EARNINGS")
 }

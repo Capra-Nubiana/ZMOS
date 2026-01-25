@@ -17,7 +17,7 @@ import { QuerySessionsDto } from '../dto/query-sessions.dto';
 
 @Injectable()
 export class SessionInstanceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(createSessionInstanceDto: CreateSessionInstanceDto) {
     const { sessionTypeId, locationId, startTime, endTime, capacity } =
@@ -294,6 +294,9 @@ export class SessionInstanceService {
 
     // Filter out sessions that are at capacity
     const availableSessions = result.data.filter((session) => {
+      // If capacity is null, it's unlimited
+      if (session.capacity === null) return true;
+
       const bookedCount = session.bookings.filter(
         (b) => b.status === 'confirmed',
       ).length;

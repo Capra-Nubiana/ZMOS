@@ -25,13 +25,20 @@ describe('BookingService', () => {
         create: jest.fn(),
         update: jest.fn(),
         findMany: jest.fn(),
+        count: jest.fn(),
       },
       movementEvent: {
         create: jest.fn(),
       },
     },
     tenantId: 'test-tenant-id',
+    $transaction: jest.fn((callback) => callback(mockPrismaService)),
   };
+
+  // Alias root properties to extended for transaction support
+  (mockPrismaService as any).booking = mockPrismaService.extended.booking;
+  (mockPrismaService as any).movementEvent = mockPrismaService.extended.movementEvent;
+  (mockPrismaService as any).sessionInstance = mockPrismaService.extended.sessionInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -62,8 +69,8 @@ describe('BookingService', () => {
 
     const mockSessionInstance = {
       id: sessionInstanceId,
-      startTime: new Date(Date.now() + 3600000), // 1 hour from now
-      endTime: new Date(Date.now() + 7200000), // 2 hours from now
+      startTime: new Date(Date.now() + 3600000 * 24), // 24 hours from now
+      endTime: new Date(Date.now() + 3600000 * 25), // 25 hours from now
       capacity: 10,
       status: 'scheduled',
       sessionType: { name: 'HIIT Class' },
@@ -156,6 +163,35 @@ describe('BookingService', () => {
         'Session is full',
       );
     });
+
+    it('should create a booking successfully when capacity is null (unlimited)', async () => {
+      const mockSessionUnlimited = {
+        ...mockSessionInstance,
+        capacity: null,
+      };
+
+      const expectedBooking = {
+        id: 'booking-unlimited',
+        memberId,
+        sessionInstanceId,
+        status: 'confirmed',
+        sessionInstance: mockSessionUnlimited,
+        member: { id: memberId, name: 'John Doe', email: 'john@example.com' },
+      };
+
+      mockPrismaService.extended.sessionInstance.findUnique.mockResolvedValue(
+        mockSessionUnlimited,
+      );
+      mockPrismaService.extended.booking.findUnique.mockResolvedValue(null);
+      mockPrismaService.extended.booking.create.mockResolvedValue(
+        expectedBooking,
+      );
+
+      const result = await service.create(createBookingDto, memberId);
+
+      expect(mockPrismaService.extended.booking.count).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedBooking);
+    });
   });
 
   describe('checkIn', () => {
@@ -244,7 +280,7 @@ describe('BookingService', () => {
       sessionInstanceId: 'session-456',
       status: 'confirmed',
       sessionInstance: {
-        startTime: new Date(Date.now() + 7200000), // 2 hours from now
+        startTime: new Date(Date.now() + 3600000 * 5), // 5 hours from now
         sessionType: { name: 'HIIT Class' },
         location: { name: 'Main Studio' },
       },
