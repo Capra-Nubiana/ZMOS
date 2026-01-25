@@ -36,7 +36,7 @@ export class PaymentService {
    */
   async createPaymentRequest(
     createPaymentRequestDto: CreatePaymentRequestDto,
-    currentMemberId: string,
+    currentMemberId: string | null,
     tenantId: string,
   ) {
     const {
