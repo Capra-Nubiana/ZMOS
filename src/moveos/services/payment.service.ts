@@ -487,6 +487,7 @@ export class PaymentService {
   }
 
   /**
+  /**
    * Get all trainer earnings for a tenant (for owners)
    */
   async getAllTrainerEarnings(tenantId: string, month: number, year: number) {
