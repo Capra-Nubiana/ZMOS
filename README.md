@@ -163,22 +163,15 @@ See [COMMIT_CONVENTIONS.md](./COMMIT_CONVENTIONS.md) for detailed guidelines.
 
 ## Development Workflow
 
-### Branch Strategy
+### Strict Branching & History
+> [!IMPORTANT]
+> All new work must branch off `develop`. A linear commit history is mandatory.
 
-- `main`: Production-ready code
-- `develop`: Integration branch
-- `feature/*`: Feature branches
-- `bugfix/*`: Bug fix branches
-
-### Pull Request Process
-
-1. Create feature branch from `develop`
-2. Make changes with proper commit messages
-3. Push branch and create PR
-4. Code review and approval
-5. Squash merge to `develop`
-6. Deploy to staging for testing
-7. Merge to `main` for production
+See [WORKFLOW_GUIDE.md](./WORKFLOW_GUIDE.md) for detailed instructions on:
+- Branch naming: `capra-nubiana/{type}/{description}`
+- Conventional commit standards
+- PR process and squash-merge requirements
+- Deployment pipelines
 
 ## Environment Variables
 

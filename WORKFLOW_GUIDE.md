@@ -45,27 +45,31 @@ push.default=simple
 - ✅ No deletions allowed
 
 ### Feature Branches
-- Named: `capra-nubiana/{type}/{description}`
-- Types: `feature`, `bugfix`, `docs`, `chore`
-- Automatically created with tracking
+- **Prefix**: `capra-nubiana/{type}/{description}` (e.g., `capra-nubiana/feature/dashboard`)
+- **Base Branch**: **MUST** branch off the `develop` branch.
+- **Workflow**: Automated tracking and linear history enforcement.
 
 ## 🚀 Daily Development Workflow
 
 ### Starting New Work
+> [!IMPORTANT]
+> All new features and fixes must branch off `develop`. Direct changes to `main` or `develop` are prohibited.
+
 ```bash
 # Sync with latest develop
 npm run sync
 
 # Create new feature branch
-npm run new-branch
-# Follow prompts to create: capra-nubiana/feature/my-feature
-
-# Or create manually:
+# Format: capra-nubiana/feature/description
 git checkout develop
 git pull origin develop
 git checkout -b capra-nubiana/feature/my-feature
 git push -u origin capra-nubiana/feature/my-feature
 ```
+
+### Commit Strategy & Linear History
+> [!IMPORTANT]
+> A **linear commit history** is mandatory. Avoid merge commits on `main` and `develop`. Use squashed merges for PRs to keep the integration history clean.
 
 ### Making Changes
 ```bash
